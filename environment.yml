@@ -13,6 +13,10 @@ dependencies:
   - scikit-learn
   - pytorch==1.11.0
   - torchvision==0.12.0
-  - pip
   - python=3.8
   - matplotlib
+  - pip
+  - pip:                # everything under this, installed by pip
+    - thop
+    - lightly
+

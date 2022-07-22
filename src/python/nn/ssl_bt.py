@@ -140,7 +140,7 @@ if __name__ == "__main__":
     opt = options()
 
     print(opt)
-    data_inject_size = opt.model_name == "ModelSMRN" or opt.inject_size
+    data_inject_size = opt.model_name == "ModelSDRN" or opt.inject_size
 
     # setup data
     train_loader, memory_loader, val_loader, test_loader = setup_data(

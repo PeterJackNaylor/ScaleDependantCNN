@@ -38,7 +38,7 @@ process ssl_bt {
         """
 }
 
-moco_training = file("nn/lightly_moco.py")
+moco_training = file("${pyf}/ssl_moco.py")
 
 process ssl_moco {
     publishDir "${DATA}_output/ssl/MoCo", mode: 'symlink'

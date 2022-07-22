@@ -6,6 +6,8 @@ import torch
 from torch import nn
 import copy
 import argparse
+import numpy as np
+from typing import List
 
 from lightly.data import LightlyDataset
 from lightly.data import MoCoCollateFunction
@@ -18,6 +20,88 @@ from model import fetch_backbone
 import pandas as pd
 from test import test_moco, get_encoding_moco
 from tqdm import tqdm, trange
+
+
+class MyLightlyDataset(LightlyDataset):
+    def __getitem__(self, index: int):
+        """Returns (sample, target, fname) of item at index.
+
+        Args:
+            index:
+                Index of the queried item.
+
+        Returns:
+            The image, target, and filename of the item at index.
+
+        """
+        fname = self.index_to_filename(self.dataset, index)
+        samples = self.dataset.__getitem__(index)
+        if len(samples) == 2:
+            sample, target = samples
+            return sample, target, fname
+        else:
+            sample, h, w, target = samples
+            return (
+                sample,
+                target,
+                fname,
+                h,
+                w,
+            )
+
+
+class MyMoCoCollateFunction(MoCoCollateFunction):
+    def forward(self, batch: List[tuple]):
+        """Turns a batch of tuples into a tuple of batches.
+
+        Args:
+            batch:
+                A batch of tuples of images, labels, and filenames which
+                is automatically provided if the dataloader is built from
+                a LightlyDataset.
+
+        Returns:
+            A tuple of images, labels, and filenames. The images consist of
+            two batches corresponding to the two transformations of the
+            input images.
+
+        Examples:
+            >>> # define a random transformation and the collate function
+            >>> transform = ... # some random augmentations
+            >>> collate_fn = BaseCollateFunction(transform)
+            >>>
+            >>> # input is a batch of tuples (here, batch_size = 1)
+            >>> input = [(img, 0, 'my-image.png')]
+            >>> output = collate_fn(input)
+            >>>
+            >>> # output consists of two random transforms of the images,
+            >>> # the labels, and the filenames in the batch
+            >>> (img_t0, img_t1), label, filename = output
+
+        """
+        batch_size = len(batch)
+
+        # list of transformed images
+        transforms = [
+            self.transform(batch[i % batch_size][0]).unsqueeze_(0)
+            for i in range(2 * batch_size)
+        ]
+        # list of labels
+        labels = torch.LongTensor([item[1] for item in batch])
+        # list of filenames
+        fnames = [item[2] for item in batch]
+        # tuple of transforms
+        transforms = (
+            torch.cat(transforms[:batch_size], 0),
+            torch.cat(transforms[batch_size:], 0),
+        )
+
+        if len(batch[0]) > 3:
+            h = torch.Tensor(np.array([item[3] for item in batch]))
+            w = torch.Tensor(np.array([item[3] for item in batch]))
+            return transforms, labels, fnames, h, w
+        return transforms, labels, fnames
+
 
 parser = argparse.ArgumentParser(description="PyTorch ImageNet Training")
 parser.add_argument(
@@ -186,11 +270,11 @@ def cam_loader(
         split=split,
         everyone=everyone,
     )
-    dataset = LightlyDataset.from_torch_dataset(cam)
+    dataset = MyLightlyDataset.from_torch_dataset(cam)
     # or create a dataset from a folder containing images or videos:
     # dataset = LightlyDataset("path/to/folder")
 
-    collate_fn = MoCoCollateFunction(
+    collate_fn = MyMoCoCollateFunction(
         input_size=32,
         cj_prob=0,
         random_gray_scale=0,
@@ -232,11 +316,11 @@ def cam_memory_train(
         split=split,
         everyone=everyone,
     )
-    dataset = LightlyDataset.from_torch_dataset(cam)
+    dataset = MyLightlyDataset.from_torch_dataset(cam)
     # or create a dataset from a folder containing images or videos:
     # dataset = LightlyDataset("path/to/folder")
 
-    collate_fn = MoCoCollateFunction(
+    collate_fn = MyMoCoCollateFunction(
         input_size=32,
         cj_prob=0,
         random_gray_scale=0,
@@ -285,7 +369,7 @@ class MoCo(nn.Module):
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 name = args.arch
-inject_size = args.arch == "ModelSMRN" or args.inject_size
+inject_size = args.arch == "ModelSDRN" or args.inject_size
 data_path = args.data_path
 data_info = args.data_info
 batch_size = args.batch_size
@@ -346,7 +430,7 @@ test_cam = cam_loader(
 )
 
 criterion = NTXentLoss(memory_bank_size=4096)
-optimizer = torch.optim.SGD(
+optimizer = torch.optim.Adam(
     model.parameters(), lr=args.lr, weight_decay=args.weight_decay
 )
 results = {"train_loss": [], "test_acc@1": [], "test_acc@3": []}
@@ -366,11 +450,7 @@ for epoch in trange(1, args.epochs + 1):
         if inject_size:
             (x_query, x_key), _, _, h, w = batch
         else:
-            (
-                (x_query, x_key),
-                _,
-                _,
-            ) = batch
+            (x_query, x_key), _, _ = batch
         update_momentum(model.backbone, model.backbone_momentum, m=0.99)
         update_momentum(
             model.projection_head,
@@ -427,7 +507,7 @@ for epoch in trange(1, args.epochs + 1):
             join(args.output, "{}_model_{}.pth".format(save_name_pre, epoch)),
         )
     avg_loss = total_loss / len(train_cam)
-    print(f"epoch: {epoch:>02}, loss: {avg_loss:.5f}")
+    print(f"Epoch: {epoch:>02}, loss: {avg_loss:.5f}")
 
 
 model.load_state_dict(

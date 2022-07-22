@@ -36,18 +36,18 @@ workflow evaluation {
         pretrained
         sl_enc
         sl_stat
-        // ssl_moco
-        // ssl_moco
+        ssl_moco_enc
+        ssl_moco_stat
         ssl_bt_enc
         ssl_bt_stat
     main:
-        sl_enc.concat(cs_enc, ssl_bt_enc, pretrained) .set {encodings}
-        sl_stat.concat(cs_stat, ssl_bt_stat) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
-        // sl_enc.concat(cs_enc, ssl_bt_enc, ssl_moco[0], pretrained) .set {encodings}
-        // sl_stat.concat(cs_stat, ssl_bt_stat, ssl_moco[1]) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
+        // sl_enc.concat(cs_enc, ssl_bt_enc, pretrained) .set {encodings}
+        // sl_stat.concat(cs_stat, ssl_bt_stat) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
+        sl_enc.concat(cs_enc, ssl_bt_enc, ssl_moco_enc, pretrained) .set {encodings}
+        sl_stat.concat(cs_stat, ssl_bt_stat, ssl_moco_stat) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
 
         LR_KNN_evaluation(encodings)
 
-        LR_KNN_evaluation.out.collectFile(name: "./performance.csv", skip: 1, keepHeader: true) .set{test_score}
+        LR_KNN_evaluation.out.collectFile(name: "./paper_output/performance.csv", skip: 1, keepHeader: true) .set{test_score}
         publish(test_score, training_score)
 }

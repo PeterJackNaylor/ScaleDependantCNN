@@ -2,7 +2,7 @@
 
 
 # ScaleDependentCNN
-This repository contains all the necessary to reproduce the work *Scale dependant layer for self-supervised nuclei encoding* by Naylor Peter, Yao-Hung Hubert Tsai, Marick Laé and Makoto Yamada.
+This repository contains all the necessary to reproduce the work "*Scale dependant layer for self-supervised nuclei encoding*" by Naylor Peter, Yao-Hung Hubert Tsai, Marick Laé and Makoto Yamada.
 
 
 ## Requirements
@@ -12,7 +12,7 @@ For pytorch and torchvision, please be sure to take compatible versions.
 ## Nextflow specifics
 Please modify the `nextflow.config` to meet the specificities of your informatics setup.
 We used a SGE cluster provided by RIKEN AIP with CPU and GPU queues. 
-Processing the PanNuke dataset requires more memory and computational power then the others, if you are limited in this regard please remove this dataset from the `benchmark.nf` file.
+Processing the PanNuke dataset requires more memory and computational power then the others, if you are limited in this regard, please remove this dataset from the `benchmark.nf` file.
 ## Reproduce results in paper
 Please run the commands in this order:
 ``` bash
@@ -35,7 +35,7 @@ LAMBDA = [0.00078125, 0.0078125, 0.078125]
 LR = [0.0001, 0.001, 0.01, 0.1]
 WD = [0, 1e-6, 1e-4, 1e-2, 1.]
 FEATURE_DIM = [32, 64, 128] 
-models = ["ModelSMRN", "ModelSRN"]
+models = ["ModelSDRN", "ModelSRN"]
 opt = ["--inject_size", "--no_size"]
 repetition = 20
 ```

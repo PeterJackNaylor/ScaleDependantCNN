@@ -30,7 +30,7 @@ workflow {
 
         supervised_extraction(ext, models, opt, 1..repetition, LR, WD)
 
-        // ssl_moco(ext, models, opt, 1..repetition, LR, WD)
+        ssl_moco(ext, models, opt, 1..repetition, LR, WD)
 
         ssl_bt(ext, models, opt, LAMBDA, FEATURE_DIM, 1..repetition, LR, WD)
 
@@ -39,7 +39,9 @@ workflow {
                 pretrained_imagenet.out,
                 supervised_extraction.out[0],
                 supervised_extraction.out[1],
-                // ssl_moco.out, 
+                ssl_moco.out[0],
+                ssl_moco.out[1], 
                 ssl_bt.out[0], 
-                ssl_bt.out[1])
+                ssl_bt.out[1]
+                )
 }

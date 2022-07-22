@@ -6,7 +6,6 @@ download_data:
 
 setup_conda:
 	conda env create -f environment.yml
-	pip install -r requirements.txt
 
 experiment :
 	nextflow run benchmark.nf -resume --config ./.nextflow.config
