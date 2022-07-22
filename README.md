@@ -1,7 +1,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3552674.svg)](https://doi.org/10.5281/zenodo.3552674)
 
 
-# ScaleDependentCNN
+# ScaleDependantCNN
 This repository contains all the necessary to reproduce the work "*Scale dependant layer for self-supervised nuclei encoding*" by Naylor Peter, Yao-Hung Hubert Tsai, Marick Laé and Makoto Yamada.
 
 
