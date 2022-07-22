@@ -15,9 +15,9 @@ LAMBDA = [0.0078125]
 LR = [0.001]
 WD = [1e-6]
 FEATURE_DIM = [64] 
-models = ["ModelSDRN"]//, "ModelSRN"]
-opt = ["--inject_size"]//, "--no_size"]
-repetition = 2
+models = ["ModelSDRN", "ModelSRN"]
+opt = ["--inject_size", "--no_size"]
+repetition = 20
 
 workflow {
     main:

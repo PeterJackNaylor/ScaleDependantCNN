@@ -41,8 +41,6 @@ workflow evaluation {
         ssl_bt_enc
         ssl_bt_stat
     main:
-        // sl_enc.concat(cs_enc, ssl_bt_enc, pretrained) .set {encodings}
-        // sl_stat.concat(cs_stat, ssl_bt_stat) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
         sl_enc.concat(cs_enc, ssl_bt_enc, ssl_moco_enc, pretrained) .set {encodings}
         sl_stat.concat(cs_stat, ssl_bt_stat, ssl_moco_stat) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
 
