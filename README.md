@@ -45,7 +45,7 @@ Please cite our paper if you use our dataset or code.
 ```
 @article{naylor2022scaledependant,
   title={Scale dependant layer for self-supervised nuclei encoding},
-  author={Naylor, Peter and Yao-Hung, Hubert Tsai and Laé, Marick and Yamada, Makoto.},
+  author={Naylor, Peter and Tsai, Yao-Hung Hubert and Laé, Marick and Yamada, Makoto.},
   journal={arXiv preprint arXiv:},
   year={2022}
 }
