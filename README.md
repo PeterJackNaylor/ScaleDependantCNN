@@ -2,7 +2,7 @@
 
 
 # ScaleDependantCNN
-This repository contains all the necessary to reproduce the work "*Scale dependant layer for self-supervised nuclei encoding*" by Naylor Peter, Yao-Hung Hubert Tsai, Marick Laé and Makoto Yamada.
+This repository contains all the necessary to reproduce the work "*Scale dependant layer for self-supervised nuclei encoding*" by Peter Naylor, Yao-Hung Hubert Tsai, Marick Laé and Makoto Yamada.
 
 
 ## Requirements
