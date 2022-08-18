@@ -69,6 +69,32 @@ process cross_selection {
         """
 }
 
+pad_mask = file("${pyf}/pad_mask.py")
+
+process padding_mask {
+    input:
+        tuple val(DATAn), path(DATAcsv), path(DATAnpy)
+        val SIZE
+    output:
+        tuple val("${DATAn}padded"), path(DATAcsv), path("${DATAn}_tinycells_paddedmask.npy")
+    script:
+        """
+        python $pad_mask ${DATAnpy} ${DATAcsv} ${SIZE}
+        """
+
+}
+
+workflow add_padding_mask {
+    take:
+        manual_features
+        size
+    main:
+        padding_mask(manual_features, size)
+        padding_mask.out.concat(manual_features).set{output}
+    emit:
+        output
+}
+
 workflow manual {
     take:
         manual_features

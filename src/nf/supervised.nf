@@ -12,6 +12,10 @@ process pretrained {
         tuple val("${NAME}_pretrained"), path("${NAME}_pretrained.csv"), path(DATA_csv)
         path("${NAME}_pretrained_training_statistics.csv")
         path("*.csv")
+
+    when:
+        !(DATA.contains("padded")) || OPT == "--no_size"
+
     script:
         NAME = "${DATA}_${OPT}"
         """
@@ -62,14 +66,21 @@ process supervised_extraction {
         tuple val("${NAME}_supervised"), path("${NAME}_supervised.csv"), path(DATA_csv)
         path("${NAME}_supervised_training_statistics.csv")
         path("*.csv")
+
+    when:
+        !(DATA.contains("padded")) || (OPT == "--no_size" & MODEL_NAME == "ModelSRN")
+
     script:
         NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}"
         if ("${DATA}" == "pannuke"){
             BS = 512
-            EPOCH = 50
+            EPOCH = 20
         } else {
             BS = 128
-            EPOCH = 100
+            EPOCH = 30
+        }
+        if (("${DATA}").contains("padded")){
+            BS = 64
         }
         """
         python $s_learning --data_path $DATA_npy --data_info $DATA_csv \

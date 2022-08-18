@@ -7,5 +7,8 @@ download_data:
 setup_conda:
 	conda env create -f environment.yml
 
-experiment :
+experiment:
 	nextflow run benchmark.nf -resume --config ./.nextflow.config
+
+moco_experiment:
+	nextflow run moco_exp.nf -resume --config ./.nextflow.config

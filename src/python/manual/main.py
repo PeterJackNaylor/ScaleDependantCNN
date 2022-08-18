@@ -210,6 +210,8 @@ if __name__ == "__main__":
 
     res = pd.concat(table_list, axis=0)
     res = res[(res.T != 0).any()]  # drop rows where that are only 0! :)
+    all_cells = np.vstack(cell_list)
+    all_cells = all_cells[res.index]
 
     if options.type == "tnbc":
         # drop necrosis and myoepithelial
@@ -219,6 +221,7 @@ if __name__ == "__main__":
         idx_test = res[res["name"].isin([1, 9, 14])].index
         res.loc[idx_train, "fold"] = "train"
         res.loc[idx_test, "fold"] = "test"
+        all_cells = all_cells[res.index]
     elif options.type == "consep":
         label = options.name.split("_")[-1]
         res["fold"] = label
@@ -231,6 +234,5 @@ if __name__ == "__main__":
 
     check_or_create(options.out_path)
     res.to_csv(os.path.join(options.out_path, options.name + ".csv"))
-    all_cells = np.vstack(cell_list)
     fname = os.path.join(options.out_path, options.name + "_tinycells.npy")
     np.save(fname, all_cells)

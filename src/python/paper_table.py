@@ -5,12 +5,13 @@ from glob import glob
 
 
 def return_backbone(name):
+    padded = "_padded" if "padded" in name else ""
     if "ModelSRN" in name:
-        return "SRN"
+        return "SRN" + padded
     elif "ModelSDRN" in name:
-        return "SDRN"
+        return "SDRN" + padded
     else:
-        return "CS"
+        return "CS" + padded
 
 
 def name_type(name):
@@ -139,7 +140,7 @@ def gg(name, t):
 def merge_all(performance, data, average=True):
     tmp = pd.read_csv(performance, index_col=0)
     tmp["name"] = tmp.name.apply(lambda x: h(x))
-    tmp["data"] = tmp.name.apply(lambda x: x.split("_")[0].replace("cs", ""))
+    tmp["data"] = tmp.name.apply(lambda x: x.split("_")[0].replace("cs", "").replace("padded", ""))
     tmp["backbone"] = tmp.name.apply(lambda x: return_backbone(x))
     tmp["type"] = tmp.name.apply(lambda x: return_type(x))
     tmp["inject_size"] = tmp.name.apply(lambda x: inject_size_fn(x))
@@ -174,14 +175,9 @@ def merge_all(performance, data, average=True):
     tmp_mean = tmp_mean.drop("data", axis=1)
 
     tmp_mean = tmp_mean.join(tr)
-    tmp_std.columns = [
-        "train_score_std",
-        "test_score_std",
-        "knn_score_std",
-        "knn_score3_std",
-        "forest_train_std",
-        "forest_test_std",
-    ]
+
+    list_col = [el + "_std" for el in tmp_std.columns]
+    tmp_std.columns = list_col
     tmp_mean = tmp_mean.join(tmp_std)
     tmp_mean["validation_accuracy_knn"] = tmp_mean.apply(
         lambda x: g(x["validation_accuracy_knn"], x["type"]), axis=1
@@ -227,7 +223,7 @@ def merge_all(performance, data, average=True):
 
 def main():
     tmp = pd.read_csv(sys.argv[1], index_col=0)
-    tmp["data"] = tmp.name.apply(lambda x: x.split("_")[0].replace("cs", ""))
+    tmp["data"] = tmp.name.apply(lambda x: x.split("_")[0].replace("cs", "").replace("padded", ""))
     available_data = list(tmp.data.unique())
     tabs = []
     for data in available_data:

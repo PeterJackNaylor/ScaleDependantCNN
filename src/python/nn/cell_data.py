@@ -134,106 +134,71 @@ class MyRandomResizedCrop(transforms.RandomResizedCrop):
 
 
 resize_crop_object = MyRandomResizedCrop(32, scale=(0.8, 1.0))
+resize_crop_object128 = MyRandomResizedCrop(128, scale=(0.8, 1.0))
 
 
-def my_resizecrop(image, h, w, p):
+def my_resizecrop(image, h, w, p, size=32):
     if random.random() > 1 - p:
-        image, h, w = resize_crop_object(image, h, w)
+        if size == 32:
+            image, h, w = resize_crop_object(image, h, w)
+        elif size == 128:
+            image, h, w = resize_crop_object128(image, h, w)
+
     return image, h, w
 
 
-def size_transform(x, h, w, p):
+def size_transform(x, h, w, p, size=32):
     x, h, w = my_rotation(x, h, w, p)
-    x, h, w = my_resizecrop(x, h, w, p)
+    x, h, w = my_resizecrop(x, h, w, p, size)
     return x, h, w
 
+training_transforms = transforms.Compose(
+    [
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomVerticalFlip(p=0.5),
+        transforms.RandomAutocontrast(p=0.5),
+        transforms.RandomApply(
+            [transforms.ColorJitter(0.2, 0.2, 0.2, 0.1)], p=0.8
+        ),
+        transforms.RandomGrayscale(p=0.2),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+        ),
+    ]
+    )
 
-class Transform:
-    def __init__(self, train_transform=True):
-        self.train_transform = train_transform
-        if self.train_transform is True:
-            self.transform = transforms.Compose(
-                [
-                    transforms.RandomHorizontalFlip(p=0.5),
-                    transforms.RandomVerticalFlip(p=0.5),
-                    transforms.RandomAutocontrast(p=0.5),
-                    transforms.RandomApply(
-                        [transforms.ColorJitter(0.2, 0.2, 0.2, 0.1)], p=0.8
-                    ),
-                    transforms.RandomGrayscale(p=0.2),
-                    transforms.ToTensor(),
-                    transforms.Normalize(
-                        [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
-                    ),
-                ]
-            )
-        else:
-            self.transform = transforms.Compose(
-                [
-                    transforms.ToTensor(),
-                    transforms.Normalize(
-                        [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
-                    ),
-                ]
-            )
-
-    def __call__(self, x, h=0, w=0):
-        if self.train_transform is True:
-            x, h, w = size_transform(x, h, w, 0.8)
-
-        return self.transform(x), h, w
-
+test_transforms = transforms.Compose(
+    [
+        transforms.ToTensor(),
+        transforms.Normalize(
+            [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+        ),
+    ]
+)
 
 class PairTransform:
-    def __init__(self, train_transform=True, pair_transform=True):
+    def __init__(self, train_transform=True, pair_transform=True, size=32):
         self.train_transform = train_transform
         if self.train_transform is True:
-            self.transform = transforms.Compose(
-                [
-                    transforms.RandomHorizontalFlip(p=0.5),
-                    transforms.RandomVerticalFlip(p=0.5),
-                    transforms.RandomAutocontrast(p=0.5),
-                    transforms.RandomApply(
-                        [transforms.RandomResizedCrop(32, scale=(0.8, 1.0))],
-                        p=0.8,
-                    ),
-                    transforms.RandomApply(
-                        [transforms.RandomRotation((0, 180))], p=0.8
-                    ),
-                    transforms.RandomApply(
-                        [transforms.ColorJitter(0.2, 0.2, 0.2, 0.1)], p=0.8
-                    ),
-                    transforms.RandomGrayscale(p=0.2),
-                    transforms.ToTensor(),
-                    transforms.Normalize(
-                        [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
-                    ),
-                ]
-            )
+            self.transform = training_transforms
         else:
-            self.transform = transforms.Compose(
-                [
-                    transforms.ToTensor(),
-                    transforms.Normalize(
-                        [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
-                    ),
-                ]
-            )
+            self.transform = test_transforms
         self.pair_transform = pair_transform
-
+        self.size = size
     def __call__(self, x, h=0, w=0):
         if self.pair_transform is True:
             if self.train_transform:
-                x1, h1, w1 = size_transform(x.copy(), h.copy(), w.copy(), 0.8)
-                x2, h2, w2 = size_transform(x, h, w, 0.8)
+                x1, h1, w1 = size_transform(x.copy(), h.copy(), w.copy(), 0.8, self.size)
+                x2, h2, w2 = size_transform(x, h, w, 0.8, self.size)
             else:
-                x1, x2 = x, x
+                x1, x2 = x, x.copy()
             y1 = self.transform(x1)
             y2 = self.transform(x2)
             return (y1, y2), (h1, h2), (w1, w2)
         else:
             if self.train_transform:
-                x, h, w = size_transform(x, h, w, 0.8)
+                x, h, w = size_transform(x, h, w, 0.8, self.size)
             return self.transform(x), h, w
 
 
@@ -245,17 +210,18 @@ def setup_data(
     workers,
     ssl=True,
 ):
+    
+    size = np.load(data_path).shape[1]
     seed = 42
     split = 0.2
     if ssl:
-        train_transform = PairTransform(train_transform=True)
-        test_transform = PairTransform(
-            train_transform=False,
-            pair_transform=False,
-        )
+        train_transform = PairTransform(train_transform=True, size=size)
     else:
-        train_transform = Transform(train_transform=True)
-        test_transform = Transform(train_transform=False)
+        train_transform = PairTransform(train_transform=True, pair_transform=False, size=size)
+    test_transform = PairTransform(
+        train_transform=False,
+        pair_transform=False,
+    )
     train_data = CAM32(
         data_path=data_path,
         data_info=data_info,
