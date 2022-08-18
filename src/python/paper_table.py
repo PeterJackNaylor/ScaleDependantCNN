@@ -61,23 +61,24 @@ def return_title(name):
 
 
 def extract_lr(name):
+
     if "ssl" in name:
-        return float(name.split("_")[-3])
+        return float(name.split("_")[4])
     elif "moco" in name:
-        return float(name.split("_")[-3])
+        return float(name.split("_")[4])
     elif "supervised" in name:
-        return float(name.split("_")[-3])
+        return float(name.split("_")[4])
     else:
         return 0
 
 
 def extract_wd(name):
     if "ssl" in name:
-        return float(name.split("_")[-2])
+        return float(name.split("_")[5])
     elif "moco" in name:
-        return float(name.split("_")[-2])
+        return float(name.split("_")[5])
     elif "supervised" in name:
-        return float(name.split("_")[-2])
+        return float(name.split("_")[5])
     else:
         return 0
 
