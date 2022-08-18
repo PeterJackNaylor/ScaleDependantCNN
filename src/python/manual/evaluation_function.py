@@ -19,7 +19,7 @@ class Net(nn.Module):
 def fit_nn(X, y, lr=0.001, wd=1e-6, max_epochs=100, tol=1e-5):
     model = Net(size=X.shape[1], num_class=np.unique(y).shape[0])
     model.train()
-    weights = np.unique(y, return_counts=True)[1] / y.shape[0]
+    weights = torch.from_numpy(np.unique(y, return_counts=True)[1] / y.shape[0])
     criterion = nn.CrossEntropyLoss(weight=weights)
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
     # Converting inputs and labels to Variable
