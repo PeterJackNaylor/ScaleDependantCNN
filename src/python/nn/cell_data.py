@@ -152,33 +152,130 @@ def size_transform(x, h, w, p, size=32):
     x, h, w = my_resizecrop(x, h, w, p, size)
     return x, h, w
 
-training_transforms = transforms.Compose(
-    [
-        transforms.RandomHorizontalFlip(p=0.5),
-        transforms.RandomVerticalFlip(p=0.5),
-        transforms.RandomAutocontrast(p=0.5),
-        transforms.RandomApply(
-            [transforms.ColorJitter(0.2, 0.2, 0.2, 0.1)], p=0.8
-        ),
-        transforms.RandomGrayscale(p=0.2),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
-        ),
-    ]
-    )
 
-test_transforms = transforms.Compose(
-    [
-        transforms.ToTensor(),
-        transforms.Normalize(
-            [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
-        ),
-    ]
-)
+def transformation_to_apply(name):
+    if name == "normal":
+        training_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.RandomAutocontrast(p=0.5),
+                transforms.RandomApply(
+                    [transforms.ColorJitter(0.2, 0.2, 0.2, 0.1)], p=0.8
+                ),
+                transforms.RandomGrayscale(p=0.2),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+                ),
+            ]
+        )
+    elif name == "vanilla":
+        training_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+                ),
+            ]
+        )
+    elif name == "autocontrast":
+        training_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.RandomAutocontrast(p=0.5),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+                ),
+            ]
+        )
+    elif name == "jittersmall":
+        training_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.ToTensor(),
+                transforms.RandomApply(
+                    [transforms.ColorJitter(0.1, 0.1, 0.1, 0.1, .5)], p=0.8
+                ),
+                transforms.Normalize(
+                    [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+                ),
+            ]
+        )
+    elif name == "jittermed":
+        training_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.ToTensor(),
+                transforms.RandomApply(
+                    [transforms.ColorJitter(0.2, 0.2, 0.2, 0.1)], p=0.8
+                ),
+                transforms.Normalize(
+                    [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+                ),
+            ]
+        )
+    elif name == "jitterlarge":
+        training_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.ToTensor(),
+                transforms.RandomApply(
+                    [transforms.ColorJitter(0.3, 0.3, 0.3, 0.15)], p=0.8
+                ),
+                transforms.Normalize(
+                    [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+                ),
+            ]
+        )
+    elif name == "jitterverylarge":
+        training_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.ToTensor(),
+                transforms.RandomApply(
+                    [transforms.ColorJitter(0.4, 0.4, 0.4, 0.2)], p=0.8
+                ),
+                transforms.Normalize(
+                    [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+                ),
+            ]
+        )
+    elif name == "greyscale":
+        training_transforms = transforms.Compose(
+            [
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomVerticalFlip(p=0.5),
+                transforms.ToTensor(),
+                transforms.RandomGrayscale(p=0.2),
+                transforms.Normalize(
+                    [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+                ),
+            ]
+        )
+    test_transforms = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(
+                [0.4914, 0.4822, 0.4465], [0.2023, 0.1994, 0.2010]
+            ),
+        ]
+    )
+    return training_transforms, test_transforms
+
+
 
 class PairTransform:
-    def __init__(self, train_transform=True, pair_transform=True, size=32):
+    def __init__(self, train_transform=True, pair_transform=True, name="normal", size=32):
+        training_transforms, test_transforms = transformation_to_apply(name)
         self.train_transform = train_transform
         if self.train_transform is True:
             self.transform = training_transforms
@@ -208,6 +305,7 @@ def setup_data(
     inject_size,
     batch_size,
     workers,
+    transform_type="normal",
     ssl=True,
 ):
     
@@ -215,12 +313,13 @@ def setup_data(
     seed = 42
     split = 0.2
     if ssl:
-        train_transform = PairTransform(train_transform=True, size=size)
+        train_transform = PairTransform(train_transform=True, name=transform_type, size=size)
     else:
-        train_transform = PairTransform(train_transform=True, pair_transform=False, size=size)
+        train_transform = PairTransform(train_transform=True, pair_transform=False, name=transform_type, size=size)
     test_transform = PairTransform(
         train_transform=False,
         pair_transform=False,
+        name=transform_type,
     )
     train_data = CAM32(
         data_path=data_path,

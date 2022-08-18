@@ -136,8 +136,7 @@ def gg(name, t):
     else:
         return name + "_" + t
 
-
-def merge_all(performance, data, average=True):
+def preproc(performance, data):
     tmp = pd.read_csv(performance, index_col=0)
     tmp["name"] = tmp.name.apply(lambda x: h(x))
     tmp["data"] = tmp.name.apply(lambda x: x.split("_")[0].replace("cs", "").replace("padded", ""))
@@ -182,6 +181,11 @@ def merge_all(performance, data, average=True):
     tmp_mean["validation_accuracy_knn"] = tmp_mean.apply(
         lambda x: g(x["validation_accuracy_knn"], x["type"]), axis=1
     )
+    return tmp_mean
+
+def merge_all(performance, data, average=True):
+
+    tmp_mean = preproc(performance, data)
     grps = ["backbone", "type", "inject_size"]
     keys = list(tmp_mean.groupby(grps).mean().index)
     final_table = []

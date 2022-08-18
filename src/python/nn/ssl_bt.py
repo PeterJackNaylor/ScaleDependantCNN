@@ -123,6 +123,10 @@ def options():
         dest="inject_size",
         action="store_false",
     )
+    parser.add_argument(
+        "--transforms_type",
+        default="normal",
+    )
     parser.set_defaults(corr_neg_one=False)
 
     # args parse
@@ -149,6 +153,7 @@ if __name__ == "__main__":
         data_inject_size,
         opt.batch_size,
         opt.workers,
+        opt.transforms_type,
         ssl=True,
     )
     # model setup and optimizer config
