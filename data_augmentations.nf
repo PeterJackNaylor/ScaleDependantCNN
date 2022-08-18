@@ -2,6 +2,7 @@
 
 include { extraction; manual; add_padding_mask } from './src/nf/manual_feat'
 include { ssl_bt_transform } from './src/nf/self_supervised'
+include { LR_KNN_evaluation } from './src/nf/evaluation'
 
 // parameters
 LAMBDA = [0.0078125]
@@ -11,18 +12,23 @@ FEATURE_DIM = [64]
 models = ["ModelSDRN"]
 opt = ["--no_size"]
 augmentations = ["normal", "vanilla", "autocontrast", "jittersmall", "jittermed", "jitterlarge", "jitterverylarge", "greyscale"]
-repetition = 2
+repetition = 20
 
 aug_exp = file("src/python/aug_plot.py")
 
+// data
+// dataset = Channel.from([file("./data/tnbc"), file("./data/consep"), file("./data/pannuke")])
+dataset = Channel.from([file("./data/tnbc")])
+
 process plot {
-    publishDir "paper_output/", mode: 'symlink'
+    publishDir "paper_output/augmentation", mode: 'symlink'
 
     input:
         path(TESTING_TABLE)
         path(TRAINING_TABLE)
     output:
-        path("augmentation_experiments.csv")
+        path("*.png")
+        path("*.html")
     script:
         """
         python $aug_exp $TESTING_TABLE

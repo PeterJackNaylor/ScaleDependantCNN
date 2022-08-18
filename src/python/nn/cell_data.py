@@ -155,6 +155,7 @@ def size_transform(x, h, w, p, size=32):
 
 def transformation_to_apply(name):
     if name == "normal":
+        print("using normal transformation")
         training_transforms = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(p=0.5),
@@ -171,6 +172,7 @@ def transformation_to_apply(name):
             ]
         )
     elif name == "vanilla":
+        print(f"using {name} transformation")
         training_transforms = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(p=0.5),
@@ -182,6 +184,7 @@ def transformation_to_apply(name):
             ]
         )
     elif name == "autocontrast":
+        print(f"using {name} transformation")
         training_transforms = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(p=0.5),
@@ -194,6 +197,7 @@ def transformation_to_apply(name):
             ]
         )
     elif name == "jittersmall":
+        print(f"using {name} transformation")
         training_transforms = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(p=0.5),
@@ -208,6 +212,7 @@ def transformation_to_apply(name):
             ]
         )
     elif name == "jittermed":
+        print(f"using {name} transformation")
         training_transforms = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(p=0.5),
@@ -222,6 +227,7 @@ def transformation_to_apply(name):
             ]
         )
     elif name == "jitterlarge":
+        print(f"using {name} transformation")
         training_transforms = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(p=0.5),
@@ -236,6 +242,7 @@ def transformation_to_apply(name):
             ]
         )
     elif name == "jitterverylarge":
+        print(f"using {name} transformation")
         training_transforms = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(p=0.5),
@@ -250,6 +257,7 @@ def transformation_to_apply(name):
             ]
         )
     elif name == "greyscale":
+        print(f"using {name} transformation")
         training_transforms = transforms.Compose(
             [
                 transforms.RandomHorizontalFlip(p=0.5),

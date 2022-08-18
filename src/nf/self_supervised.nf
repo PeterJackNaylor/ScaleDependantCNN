@@ -47,7 +47,7 @@ process ssl_bt {
 
 
 process ssl_bt_transform {
-    publishDir "${DATA}_output/ssl/BT", mode: 'symlink'
+    publishDir "${DATA}_output/ssl_transform_exp/BT", mode: 'symlink'
 
     input:
         tuple val(DATA), path(DATA_csv), path(DATA_npy)
@@ -94,7 +94,7 @@ process ssl_bt_transform {
 moco_training = file("${pyf}/ssl_moco.py")
 
 process ssl_moco_benchmark {
-    publishDir "${DATA}_output/ssl/MoCo", mode: 'symlink'
+    publishDir "${DATA}_output/ssl_moco_exp/MoCo", mode: 'symlink'
 
     input:
         tuple val(DATA), path(DATA_csv), path(DATA_npy)

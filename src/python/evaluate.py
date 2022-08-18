@@ -17,9 +17,7 @@ x_test = feats.loc[idx_test].values
 y_test = info.loc[idx_test, "orderedLabel"].values
 
 ytrain_pred, y_test_pred = nn_linear_prediction(x_train, y_train, x_test, y_test)
-knn_score, knn_score3 = knn_evaluation(
-    x_train, y_train, x_test, y_test, c=len(np.unique(y_train))
-)
+
 ytrain_pred = np.array(ytrain_pred)
 y_test_pred = np.array(y_test_pred)
 
@@ -37,12 +35,17 @@ results = pd.DataFrame(
     {
         "train_score": float(train_score),
         "test_score": float(test_score),
-        "knn_score": knn_score,
-        "knn_score3": knn_score3,
         "name": sys.argv[1],
     },
     index=[0],
 )
+for k in [5, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]:
+    knn_score, knn_score3 = knn_evaluation(
+        x_train, y_train, x_test, y_test, c=len(np.unique(y_train)), k=k
+    )
+    results[f"knnscoreK={k}"] = knn_score
+    results[f"knnscore3K={k}"] = knn_score3
+
 
 precision, recall, fscore, support = precision_recall_fscore_support(y_test, y_test_pred.argmax(axis=1), labels=labels, average=None)
 

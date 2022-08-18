@@ -12,3 +12,6 @@ experiment:
 
 moco_experiment:
 	nextflow run moco_exp.nf -resume --config ./.nextflow.config
+
+augmentation_experiment:
+	nextflow run data_augmentations.nf -resume --config ./.nextflow.config
