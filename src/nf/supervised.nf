@@ -77,7 +77,7 @@ process supervised_extraction {
             EPOCH = 20
         } else {
             BS = 128
-            EPOCH = 30
+            EPOCH = 50
         }
         if (("${DATA}").contains("padded")){
             BS = 64
