@@ -11,15 +11,15 @@ dataset = Channel.from([file("./data/tnbc")])
 
 // parameters
 methods_selection = ["ascending", "descending"]
-LAMBDA = [0.0078125]
-LR = [0.001]
-WD = [1e-6]
+LAMBDA = [0.00078125, 0.0078125, 0.078125]
+LR = [0.001, 0.01, 0.1]
+WD = [0, 1e-3, 1.]
 FEATURE_DIM = [64] 
-MB = [65536]
 models = ["ModelSDRN", "ModelSRN"]
 opt = ["--inject_size", "--no_size"]
+MB = [65536]
 padding_size = 128
-repetition = 2
+repetition = 20
 
 workflow {
     main:
@@ -34,17 +34,15 @@ workflow {
 
         supervised_extraction(data, models, opt, 1..repetition, LR, WD)
 
-        ssl_moco_benchmark(data, models, opt, 1..repetition, LR, WD, MB)
+        // ssl_moco_benchmark(data, models, opt, 1..repetition, LR, WD, MB)
+        // ssl_moco_benchmark.out[0],
+        // ssl_moco_benchmark.out[1], 
 
         ssl_bt(data, models, opt, LAMBDA, FEATURE_DIM, 1..repetition, LR, WD)
 
-        evaluation(manual.out[0],
-                manual.out[1],
-                pretrained_imagenet.out,
-                supervised_extraction.out[0],
-                supervised_extraction.out[1],
-                ssl_moco_benchmark.out[0],
-                ssl_moco_benchmark.out[1], 
-                ssl_bt.out[0], 
-                ssl_bt.out[1])
+
+        ssl_bt.out[0].concat(manual.out[0], supervised_extraction.out[0], pretrained_imagenet.out) .set {encodings}
+        ssl_bt.out[1].concat(manual.out[1], supervised_extraction.out[1]) .collectFile(skip: 1, keepHeader: true).collect() .set {}
+
+        evaluation(encodings, training_score)
 }

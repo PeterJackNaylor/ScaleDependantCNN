@@ -31,18 +31,9 @@ process publish {
 
 workflow evaluation {
     take:
-        cs_enc
-        cs_stat
-        pretrained
-        sl_enc
-        sl_stat
-        ssl_moco_enc
-        ssl_moco_stat
-        ssl_bt_enc
-        ssl_bt_stat
+        encodings
+        training_score
     main:
-        sl_enc.concat(cs_enc, ssl_bt_enc, ssl_moco_enc, pretrained) .set {encodings}
-        sl_stat.concat(cs_stat, ssl_bt_stat, ssl_moco_stat) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
 
         LR_KNN_evaluation(encodings)
 
