@@ -250,7 +250,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--k",
-    default=200,
+    default=40,
     type=int,
     help="Top k most similar images used to predict the label",
 )
