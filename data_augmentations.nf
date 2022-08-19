@@ -11,7 +11,7 @@ WD = [1e-6]
 FEATURE_DIM = [64] 
 models = ["ModelSDRN"]
 opt = ["--no_size"]
-augmentations = ["vanilla", "autocontrast", "jittersmall", "jittermed", "jitterlarge", "jitterverylarge", "greyscale"]
+augmentations = ["normal", "vanilla", "autocontrast", "jittersmall", "jittermed", "jitterlarge", "jitterverylarge", "greyscale"]
 repetition = 20
 
 aug_exp = file("src/python/aug_plot.py")

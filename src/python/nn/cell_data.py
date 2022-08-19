@@ -162,7 +162,7 @@ def transformation_to_apply(name):
                 transforms.RandomVerticalFlip(p=0.5),
                 transforms.RandomAutocontrast(p=0.5),
                 transforms.RandomApply(
-                    [transforms.ColorJitter(0.2, 0.2, 0.2, 0.1)], p=0.8
+                    [transforms.ColorJitter(0.3, 0.3, 0.3, 0.15)], p=0.8
                 ),
                 transforms.RandomGrayscale(p=0.2),
                 transforms.ToTensor(),
