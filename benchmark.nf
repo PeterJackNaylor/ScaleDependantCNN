@@ -42,7 +42,7 @@ workflow {
 
 
         ssl_bt.out[0].concat(manual.out[0], supervised_extraction.out[0], pretrained_imagenet.out) .set {encodings}
-        ssl_bt.out[1].concat(manual.out[1], supervised_extraction.out[1]) .collectFile(skip: 1, keepHeader: true).collect() .set {}
+        ssl_bt.out[1].concat(manual.out[1], supervised_extraction.out[1]) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
 
         evaluation(encodings, training_score)
 }
