@@ -18,7 +18,7 @@ def main():
     fig.update_xaxes(title_text='Augmentation Strategy')
     fig.update_yaxes(title_text='Linear score')
     fig.update_xaxes(
-        ticktext=["Vanilla", "Greyscale", "Autocontrast", "Jitter (S)", "Jitter (M)", "Jitter (L)", "Jitter (XL)", "All"],
+        ticktext=["Vanilla", "Greyscale", "Autocontrast", "Color Jitter (S)", "ColorJitter (M)", "ColorJitter (L)", "ColorJitter (XL)", "All"],
         tickvals=tickvals
     )
 
