@@ -6,7 +6,7 @@ include { LR_KNN_evaluation } from './src/nf/evaluation'
 
 // data
 // dataset = Channel.from([file("./data/tnbc"), file("./data/consep"), file("./data/pannuke")])
-dataset = Channel.from([file("./data/consep")])
+dataset = Channel.from([file("./data/tnbc")])
 
 // parameters
 LR = [0.0001, 0.001, 0.01]
