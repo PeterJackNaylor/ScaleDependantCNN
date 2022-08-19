@@ -7,7 +7,7 @@ include { evaluation } from './src/nf/evaluation'
 
 // data
 // dataset = Channel.from([file("./data/tnbc"), file("./data/consep"), file("./data/pannuke")])
-dataset = Channel.from([file("./data/tnbc")])
+dataset = Channel.from([file("./data/tnbc"), file("./data/consep")])
 
 // parameters
 methods_selection = ["ascending", "descending"]
@@ -19,7 +19,7 @@ models = ["ModelSDRN", "ModelSRN"]
 opt = ["--inject_size", "--no_size"]
 MB = [65536]
 padding_size = 128
-repetition = 20
+repetition = 40
 
 workflow {
     main:

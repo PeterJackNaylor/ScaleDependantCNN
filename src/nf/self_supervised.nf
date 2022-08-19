@@ -29,7 +29,7 @@ process ssl_bt {
             EPOCH = 20
         } else {
             BS = 128
-            EPOCH = 30
+            EPOCH = 50
         }
         if (("${DATA}").contains("padded")){
             BS = 64
@@ -73,7 +73,7 @@ process ssl_bt_transform {
             EPOCH = 20
         } else {
             BS = 128
-            EPOCH = 30
+            EPOCH = 50
         }
         if (("${DATA}").contains("padded")){
             BS = 64
@@ -118,7 +118,7 @@ process ssl_moco_benchmark {
             EPOCH = 20
         } else {
             BS = 256
-            EPOCH = 30
+            EPOCH = 50
         }
         if (("${DATA}").contains("padded")){
             BS = 64
