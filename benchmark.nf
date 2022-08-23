@@ -1,6 +1,6 @@
 
 // Imports
-include { extraction; manual; add_padding_mask } from './src/nf/manual_feat'
+include { extraction; manual; add_padding_mask; padding_mask } from './src/nf/manual_feat'
 include { pretrained_imagenet; supervised_extraction } from './src/nf/supervised'
 include { ssl_moco_benchmark; ssl_bt } from './src/nf/self_supervised'
 include { evaluation } from './src/nf/evaluation'
@@ -29,17 +29,17 @@ workflow {
 
         manual(ext, methods_selection, repetition)
 
-        add_padding_mask(ext, padding_size) .set{data}
+        padding_mask(ext, padding_size) .set{data}
 
         pretrained_imagenet(data, opt, repetition)
 
-        supervised_extraction(data, models, opt, 1..repetition, LR, WD, KS)
+        supervised_extraction(data, models, ["--inject_size"], 1..repetition, LR, WD, KS)
 
-        ssl_moco_benchmark(data, models, opt, 1..repetition, LR[1], WD[1], MB, KS)
+        ssl_moco_benchmark(ext, models, opt, 1..repetition, LR[1], WD[1], MB, KS)
         // ssl_moco_benchmark.out[0],
         // ssl_moco_benchmark.out[1], 
 
-        ssl_bt(data, models, opt, LAMBDA, FEATURE_DIM, 1..repetition, LR, WD, KS)
+        ssl_bt(data, models, ["--inject_size"], LAMBDA, FEATURE_DIM, 1..repetition, LR, WD, KS)
 
 
         ssl_bt.out[0].concat(manual.out[0], supervised_extraction.out[0], pretrained_imagenet.out, ssl_moco_benchmark.out[0]) .set {encodings}
