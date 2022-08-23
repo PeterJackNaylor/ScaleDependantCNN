@@ -18,8 +18,8 @@ def fetch_model(
         model = ModelSRN(
             BasicBlock,
             layers,
-            num_classes,
-            inject_size,
+            num_classes=num_classes,
+            inject_size=inject_size,
             kernel_size=kernel_size
         )
 
@@ -28,8 +28,8 @@ def fetch_model(
         model = ModelSDRN(
             BasicBlock,
             layers,
-            num_classes,
-            inject_size,
+            num_classes=num_classes,
+            inject_size=inject_size,
             kernel_size=kernel_size,
             scale_factor=3,
             gpu=gpu,
@@ -49,7 +49,7 @@ def fetch_model_ssl(
         model = ModelSRN_ssl(
             BasicBlock,
             layers,
-            inject_size,
+            inject_size=inject_size,
             kernel_size=kernel_size,
             feature_dim=feature_dim,
         )
@@ -59,7 +59,7 @@ def fetch_model_ssl(
         model = ModelSDRN_ssl(
             BasicBlock,
             layers,
-            inject_size,
+            inject_size=inject_size,
             kernel_size=kernel_size,
             feature_dim=feature_dim,
             scale_factor=3,
@@ -80,8 +80,8 @@ def fetch_backbone(
         model = ModelSRN_backbone(
             BasicBlock,
             layers,
-            num_classes,
-            inject_size,
+            num_classes=num_classes,
+            inject_size=inject_size,
             kernel_size=kernel_size,
             gpu=gpu,
         )
@@ -91,8 +91,8 @@ def fetch_backbone(
         model = ModelSDRN_backbone(
             BasicBlock,
             layers,
-            num_classes,
-            inject_size,
+            num_classes=num_classes,
+            inject_size=inject_size,
             kernel_size=kernel_size,
             scale_factor=3,
             gpu=gpu,

@@ -11,9 +11,9 @@ dataset = Channel.from([file("./data/tnbc"), file("./data/consep")])
 
 // parameters
 methods_selection = ["ascending", "descending"]
-LAMBDA = [0.00078125, 0.0078125, 0.078125]
-LR = [0.001, 0.01, 0.1]
-WD = [0, 1e-3, 1.0]
+LAMBDA = [0.00078125, 0.0078125]
+LR = [0.001, 0.01]
+WD = [0, 1e-4]
 FEATURE_DIM = [64] 
 models = ["ModelSDRN", "ModelSRN"]
 opt = ["--inject_size", "--no_size"]

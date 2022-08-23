@@ -60,7 +60,7 @@ class BasicBlock(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, block, layers, kernel_size=3, num_classes=1000, inject_size=False):
+    def __init__(self, block, layers, kernel_size=3, num_classes=1000, inject_size=False,):
         super().__init__()
 
         self.inplanes = 32
