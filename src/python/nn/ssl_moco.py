@@ -1,6 +1,7 @@
 # Note: The model and training settings do not follow the reference settings
 # from the paper. The settings are chosen such that the example can easily be
 # run on a small dataset with a single GPU.
+from ast import arg
 from os.path import join
 import torch
 from torch import nn
@@ -192,6 +193,12 @@ parser.add_argument(
     "--no_size",
     dest="inject_size",
     action="store_false",
+)
+parser.add_argument(
+    "--ks",
+    default=3,
+    type=int,
+    help="kernel size for the first layer",
 )
 parser.add_argument(
     "--name",
@@ -386,7 +393,7 @@ num_workers = args.workers
 
 imgsize = np.load(data_path).shape[1]
 
-srn = fetch_backbone(name, 2, inject_size, device)
+srn = fetch_backbone(name, 2, args.ks, inject_size, device)
 model = MoCo(srn)
 
 model.to(device)

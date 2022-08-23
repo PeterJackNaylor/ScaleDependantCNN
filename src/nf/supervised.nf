@@ -13,9 +13,6 @@ process pretrained {
         path("${NAME}_pretrained_training_statistics.csv")
         path("*.csv")
 
-    when:
-        !(DATA.contains("padded")) || OPT == "--no_size"
-
     script:
         NAME = "${DATA}_${OPT}"
         """
@@ -62,13 +59,14 @@ process supervised_extraction {
         each REP
         each LR
         each WD
+        val KS
     output:
         tuple val("${NAME}_supervised"), path("${NAME}_supervised.csv"), path(DATA_csv)
         path("${NAME}_supervised_training_statistics.csv")
         path("*.csv")
 
     when:
-        !(DATA.contains("padded")) || (OPT == "--no_size" & MODEL_NAME == "ModelSRN")
+        !(DATA.contains("padded")) || (MODEL_NAME == "ModelSRN")
 
     script:
         NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}"
@@ -86,7 +84,7 @@ process supervised_extraction {
         python $s_learning --data_path $DATA_npy --data_info $DATA_csv \
                         --batch_size $BS --workers 8 --epochs $EPOCH \
                         $OPT --model_name $MODEL_NAME --wd $WD\
-                        --lr $LR --output ./ --name $NAME
+                        --lr $LR --output ./ --name $NAME --ks $KS 
                     
         """
 }

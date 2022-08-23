@@ -60,14 +60,14 @@ class BasicBlock(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, block, layers, num_classes=1000, inject_size=False):
+    def __init__(self, block, layers, kernel_size=3, num_classes=1000, inject_size=False):
         super().__init__()
 
         self.inplanes = 32
         self.inject_size = inject_size
 
         self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+            3, self.inplanes, kernel_size=kernel_size, stride=1, padding=1, bias=False
         )
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -107,14 +107,14 @@ class Model(nn.Module):
 
 
 class Model_ssl(nn.Module):
-    def __init__(self, block, layers, inject_size=False, feature_dim=64):
+    def __init__(self, block, layers, kernel_size=3, inject_size=False, feature_dim=64):
         super().__init__()
 
         self.inplanes = 32
         self.inject_size = inject_size
 
         self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+            3, self.inplanes, kernel_size=kernel_size, stride=1, padding=1, bias=False
         )
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
@@ -164,6 +164,7 @@ class Model_backbone(nn.Module):
         self,
         block,
         layers,
+        kernel_size=3,
         num_classes=1000,
         inject_size=False,
         gpu=True,
@@ -174,7 +175,7 @@ class Model_backbone(nn.Module):
         self.inject_size = inject_size
 
         self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
+            3, self.inplanes, kernel_size=kernel_size, stride=1, padding=1, bias=False
         )
         self.bn1 = nn.BatchNorm2d(self.inplanes)
         self.relu = nn.ReLU(inplace=True)

@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 import numpy as np
 from glob import glob
+import ast 
 
 
 def return_backbone(name):
@@ -190,9 +191,11 @@ def preproc(performance, data, return_tmp=False):
         return tmp_mean, tmp
 
     return tmp_mean
-import ast 
+
 def compute_weighted_acc(df):
     df = df.copy().reset_index()
+    if df.data.values[0] == 'consep':
+        df.confusion_matrix = df.precision_4
     wacc_list = []
     for i in df.index:
         cm = df.loc[i, "confusion_matrix"]
@@ -292,13 +295,14 @@ def main():
         ]
         tabs.append(tmp)
     final = tabs[0]
-
-
+    import pdb; pdb.set_trace()
     for i in range(1, len(tabs)):
-        final.merge(tmp[i], on=["backbone", "type", "inject_size"])
+        final = final.merge(tabs[i], on=["backbone", "type", "inject_size"])
         final.drop(["name_x", "name_y"], axis=1, inplace=True)
+
+    import pdb; pdb.set_trace()
     final.to_csv("./paper_results.csv", index=False, sep=";")
-    # allt.loc[[0, 1, 2, 3, 4, 9, 10, 5, 6, 11, 12, 7, 8, 13, 14], :]
+    final.loc[[0, 1, 2, 3, 4, 5, 8, 9, 12, 6, 7, 10, 11, 13], :]
 
 
 if __name__ == "__main__":

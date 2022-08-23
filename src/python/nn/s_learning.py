@@ -57,6 +57,12 @@ def options():
         help="Number of sweeps over the dataset to train",
     )
     parser.add_argument(
+        "--ks",
+        default=3,
+        type=int,
+        help="kernel size for the first layer",
+    )
+    parser.add_argument(
         "--inject_size",
         dest="inject_size",
         action="store_true",
@@ -120,7 +126,7 @@ def main():
     )
     # model setup and optimizer config
     model = fetch_model(
-        opt.model_name, len(train_loader.dataset.classes), opt.inject_size, gpu
+        opt.model_name, len(train_loader.dataset.classes), opt.ks, opt.inject_size, gpu
     )
     if data_inject_size:
         fake_input = (

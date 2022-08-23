@@ -15,12 +15,13 @@ process ssl_bt {
         each REP
         each LR
         each WD
+        val KS
     output:
         tuple val("${NAME}_ssl"), path("*_ssl.csv"), path(DATA_csv)
         path("${NAME}_ssl_training_statistics.csv")
 
     when:
-        !(DATA.contains("padded")) || (OPT == "--no_size" & MODEL_NAME == "ModelSRN")
+        !(DATA.contains("padded")) || (MODEL_NAME == "ModelSRN")
 
     script:
         NAME = "${DATA}_${MODEL_NAME}_${OPT}_LAMB-${LAMBD}_FDIM-${FDIM}_${LR}_${WD}"
@@ -37,7 +38,7 @@ process ssl_bt {
         """
     	python ${bt_training} --lmbda ${LAMBD} --corr_zero \
                         --batch_size $BS --feature_dim ${FDIM} \
-                        --epochs $EPOCH --output . \
+                        --epochs $EPOCH --output . --ks $KS \
                         --model_name $MODEL_NAME --name $NAME \
                         --data_path ${DATA_npy} --data_info ${DATA_csv} \
                         --workers 8 --lr $LR --wd $WD $OPT
@@ -59,12 +60,13 @@ process ssl_bt_transform {
         each LR
         each WD
         each AUG
+        val KS
     output:
         tuple val("${NAME}_ssl"), path("*_ssl.csv"), path(DATA_csv)
         path("${NAME}_ssl_training_statistics.csv")
 
     when:
-        !(DATA.contains("padded")) || (OPT == "--no_size" & MODEL_NAME == "ModelSRN")
+        !(DATA.contains("padded")) || (MODEL_NAME == "ModelSRN")
 
     script:
         NAME = "${DATA}_${MODEL_NAME}_${OPT}_LAMB-${LAMBD}_FDIM-${FDIM}_${LR}_${WD}_${AUG}"
@@ -81,7 +83,7 @@ process ssl_bt_transform {
         """
     	python ${bt_training} --lmbda ${LAMBD} --corr_zero \
                         --batch_size $BS --feature_dim ${FDIM} \
-                        --epochs $EPOCH --output . \
+                        --epochs $EPOCH --output . --ks $KS \
                         --model_name $MODEL_NAME --name $NAME \
                         --data_path ${DATA_npy} --data_info ${DATA_csv} \
                         --workers 8 --lr $LR --wd $WD $OPT --transforms_type $AUG
@@ -104,12 +106,13 @@ process ssl_moco_benchmark {
         each LR
         each WD
         each MB
+        val KS
     output:
         tuple val("${NAME}"), path("*_moco.csv"), path(DATA_csv)
         path("${NAME}_training_statistics.csv")
 
     when:
-        !(DATA.contains("padded")) || (OPT == "--no_size" & MODEL_NAME == "ModelSRN")
+        !(DATA.contains("padded")) || (MODEL_NAME == "ModelSRN")
 
     script:
         NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}_${MB}_moco"
@@ -127,7 +130,7 @@ process ssl_moco_benchmark {
     	python ${moco_training} --data_path ${DATA_npy} \
                         --data_info ${DATA_csv} \
                         --arch $MODEL_NAME -j 6 \
-                        --name $NAME \
+                        --name $NAME --ks $KS \
                         --batch-size $BS \
                         --memory-bank $MB \
                         --epochs $EPOCH --output . \
@@ -150,12 +153,13 @@ process ssl_moco {
         each MB
         each BS
         val EPOCH
+        val KS
     output:
         tuple val("${NAME}"), path("*_moco.csv"), path(DATA_csv)
         path("${NAME}_training_statistics.csv")
 
     when:
-        !(DATA.contains("padded")) || (OPT == "--no_size" & MODEL_NAME == "ModelSRN")
+        !(DATA.contains("padded")) || (MODEL_NAME == "ModelSRN")
 
     script:
         NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}_${MB}_${BS}_moco"
@@ -163,7 +167,7 @@ process ssl_moco {
     	python ${moco_training} --data_path ${DATA_npy} \
                         --data_info ${DATA_csv} \
                         --arch $MODEL_NAME -j 6 \
-                        --name $NAME \
+                        --name $NAME --ks $KS \
                         --batch-size $BS \
                         --memory-bank $MB \
                         --epochs $EPOCH --output . \

@@ -60,6 +60,12 @@ def options():
         help="Number of sweeps over the dataset to train",
     )
     parser.add_argument(
+        "--ks",
+        default=3,
+        type=int,
+        help="kernel size for the first layer",
+    )
+    parser.add_argument(
         "--output",
         default="./",
         type=str,
@@ -160,6 +166,7 @@ if __name__ == "__main__":
     model = fetch_model_ssl(
         opt.model_name,
         opt.inject_size,
+        opt.ks,
         opt.feature_dim,
         gpu,
     )
