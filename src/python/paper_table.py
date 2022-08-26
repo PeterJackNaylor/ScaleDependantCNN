@@ -67,7 +67,7 @@ def extract_lr(name):
         
         return float(name.split("_")[6])
     elif "moco" in name:
-        return float(name.split("_")[6])
+        return float(name.split("_")[4])
     elif "supervised" in name:
         return float(name.split("_")[4])
     else:
@@ -79,7 +79,7 @@ def extract_wd(name):
     if "ssl" in name:
         return float(name.split("_")[7])
     elif "moco" in name:
-        return float(name.split("_")[7])
+        return float(name.split("_")[5])
     elif "supervised" in name:
         return float(name.split("_")[5])
     else:
@@ -192,11 +192,19 @@ def preproc(performance, data, return_tmp=False):
 
     return tmp_mean
 
+def f_one(r, p):
+    if (p + r) == 0:
+        return 0
+    return 2 * p * r / (p + r)
+
+
 def compute_weighted_acc(df):
     df = df.copy().reset_index()
     if df.data.values[0] == 'consep':
         df.confusion_matrix = df.precision_4
-    wacc_list = []
+    wrec_list = []
+    prec_list = []
+    f_list = []
     for i in df.index:
         cm = df.loc[i, "confusion_matrix"]
         cm = np.array(ast.literal_eval(cm))
@@ -207,11 +215,24 @@ def compute_weighted_acc(df):
             cm[3,3] = cm[3:,3:].sum()
             cm = cm[0:4,0:4]
         recalls = []
+        precision = []
+        f_score = []
         for i in range(cm.shape[0]):
-            recalls.append(cm[i,i] / cm[i, :].sum())
-        wacc = np.mean(recalls)
-        wacc_list.append(wacc)
-    return np.mean(wacc_list), np.std(wacc_list)
+            if cm[i, :].sum() == 0:
+                recalls.append(0)
+            else:
+                recalls.append(cm[i,i] / cm[i, :].sum())
+            if cm[:, i].sum() == 0:
+                precision.append(0)
+            else:
+                precision.append(cm[i,i] / cm[:, i].sum())
+            f_score.append(f_one(recalls[i], precision[i]))
+        wrec = np.mean(recalls)
+        wrec_list.append(wrec)
+        wprec = np.mean(precision)
+        prec_list.append(wprec)
+        f_list.append(np.mean(f_score))
+    return np.mean(wrec_list), np.std(wrec_list), np.mean(prec_list), np.std(prec_list), np.mean(f_list), np.std(f_list)
 
     
 
@@ -243,7 +264,7 @@ def merge_all(performance, data, average=True):
             tmpi = tmp[tmp["backbone"] == backbone]
             tmpi = tmp[tmp["name"] == tmptmp[variable].idxmax()]
         if average:
-            wacc, wacc_std = compute_weighted_acc(tmpi)
+            wacc, wacc_std, wprec, wprec_std, fone, fone_std = compute_weighted_acc(tmpi)
             tmpi_mean = tmpi.groupby(grps).mean().reset_index()
             tmpi_std = tmpi.groupby(grps).std().reset_index()
             tmpi_mean["recall_std"] = (
@@ -251,14 +272,26 @@ def merge_all(performance, data, average=True):
                 + " \pm "
                 + f"{wacc_std * 100:.1f}"
             )
-            for var in ["test_score", "knnscoreK=40"]:
+            tmpi_mean["prec_std"] = (
+                f"{wprec * 100:.1f}"
+                + " \pm "
+                + f"{wprec_std * 100:.1f}"
+            )
+            tmpi_mean["fscore_std"] = (
+                f"{fone * 100:.1f}"
+                + " \pm "
+                + f"{fone_std * 100:.1f}"
+            )
+            for var in ["test_score", "knnscoreK=5", "knnscoreK=20", "knnscoreK=40", "knnscoreK=80"]:
                     
                 tmpi_mean[var + "_std"] = (
                     f"{tmpi_mean[var].values[0] * 100:.1f}"
                     + " \pm "
-                    + f"{tmpi_std[var].values[0] * 100:.1f}"
+                    + f"{tmpi_std[var].values[0] * 100 * 0.438:.1f}"
                 )
+            tmpi_mean["max_training"] = tmptmp[variable].max()
             tmpi_mean["name"] = tmpi.loc[tmpi.index[0], "name"].values[0]
+
             final_table.append(tmpi_mean)
         else:
             final_table.append(tmpi)
@@ -280,8 +313,14 @@ def main():
                 "type",
                 "inject_size",
                 "recall_std",
+                "prec_std",
+                "fscore_std",
                 "test_score_std",
-                "knnscoreK=40_std",
+                # "knnscoreK=5_std",
+                # "knnscoreK=20_std",
+                # "knnscoreK=40_std",
+                # "knnscoreK=80_std",
+                "max_training",
             ]
         ]
         tmp.columns = [
@@ -290,20 +329,35 @@ def main():
             "type",
             "inject_size",
             "recall ({})".format(data),
+            "precision ({})".format(data),
+            "fscore ({})".format(data),
             "Linear ({})".format(data),
-            "kNN ({})".format(data),
+            # "kNN (k=5) ({})".format(data),
+            # "kNN (k=20) ({})".format(data),
+            # "kNN (k=40) ({})".format(data),
+            # "kNN (k=80) ({})".format(data),
+            "Selection_score",
         ]
         tabs.append(tmp)
     final = tabs[0]
-    import pdb; pdb.set_trace()
     for i in range(1, len(tabs)):
         final = final.merge(tabs[i], on=["backbone", "type", "inject_size"])
         final.drop(["name_x", "name_y"], axis=1, inplace=True)
-
+    cols = ['backbone', 'type', 'inject_size', 'recall (tnbc)', 'precision (tnbc)', 'fscore (tnbc)', 'Linear (tnbc)', 'recall (consep)', 'precision (consep)', 'fscore (consep)', 'Linear (consep)']
     import pdb; pdb.set_trace()
+    only_kcolumns = ['backbone', 'type', 'inject_size',
+       'kNN (k=5) (tnbc)', 
+       'kNN (k=20) (tnbc)', 
+       'kNN (k=40) (tnbc)',
+       'kNN (k=80) (tnbc)', 
+       'kNN (k=5) (consep)', 
+       'kNN (k=20) (consep)', 
+       'kNN (k=40) (consep)',
+       'kNN (k=80) (consep)']
+    cols = ['backbone', 'type', 'inject_size', 'recall (tnbc)', 'Linear (tnbc)', 'kNN (k=40) (tnbc)', 'recall (consep)', 'Linear (consep)', 'kNN (k=40) (consep)',"Selection_score_x", "Selection_score_y"]
     final.to_csv("./paper_results.csv", index=False, sep=";")
-    final.loc[[0, 1, 2, 3, 4, 5, 8, 9, 12, 6, 7, 10, 11, 13], :]
-
+    final = final.loc[[0, 1, 2, 3, 4, 5, 8, 9, 12, 6, 7, 10, 11, 13], :]
+    final[only_kcolumns]
 
 if __name__ == "__main__":
     main()
