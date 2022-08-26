@@ -2,7 +2,7 @@
 pyf = "src/python/manual"
 
 manual_extraction = file("${pyf}/main.py")
-pannuke_extraction = file("${pyf}/pannuke_extraction.py")
+pannuke_extraction = file("${pyf}/pannuke_main.py")
 merge = file("${pyf}/merge.py")
 
 process extraction {
