@@ -1,8 +1,8 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3552674.svg)](https://doi.org/10.5281/zenodo.3552674)
 
 
-# ScaleDependentCNN
-This repository contains all the necessary to reproduce the work "*Scale dependant layer for self-supervised nuclei encoding*" by Naylor Peter, Yao-Hung Hubert Tsai, Marick Laé and Makoto Yamada.
+# ScaleDependantCNN
+This repository contains all the necessary to reproduce the work "*Scale dependant layer for self-supervised nuclei encoding*" by Peter Naylor, Yao-Hung Hubert Tsai, Marick Laé and Makoto Yamada. You can find the paper [here](https://arxiv.org/abs/2207.10950).
 
 
 ## Requirements
@@ -45,7 +45,7 @@ Please cite our paper if you use our dataset or code.
 ```
 @article{naylor2022scaledependant,
   title={Scale dependant layer for self-supervised nuclei encoding},
-  author={Naylor, Peter and Yao-Hung, Hubert Tsai and Marick, Laé and Makoto, Yamada},
+  author={Naylor, Peter and Tsai, Yao-Hung Hubert and Laé, Marick and Yamada, Makoto.},
   journal={arXiv preprint arXiv:},
   year={2022}
 }
