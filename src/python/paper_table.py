@@ -64,7 +64,6 @@ def return_title(name):
 def extract_lr(name):
     ## 4 or 6
     if "ssl" in name:
-        
         return float(name.split("_")[6])
     elif "moco" in name:
         return float(name.split("_")[4])
@@ -85,10 +84,31 @@ def extract_wd(name):
     else:
         return 0
 
+def extract_ks(name):
+    ## 5 or 7
+    if "ssl" in name:
+        return float(name.split("_")[8])
+    elif "moco" in name:
+        return float(name.split("_")[6])
+    elif "supervised" in name:
+        return float(name.split("_")[6])
+    else:
+        return 0
+
+def extract_bs(name):
+    ## 5 or 7
+    if "ssl" in name:
+        return float(name.split("_")[9])
+    elif "moco" in name:
+        return float(name.split("_")[7])
+    elif "supervised" in name:
+        return float(name.split("_")[7])
+    else:
+        return 0
 
 def extract_lambda(name):
     if "ssl" in name:
-        return float(name.split("_")[-5].split("-")[1])
+        return float(name.split("_")[4].split("-")[1])
     elif "supervised" in name:
         return 0
     else:
@@ -150,6 +170,8 @@ def preproc(performance, data, return_tmp=False):
     tmp["lr"] = tmp.name.apply(lambda x: extract_lr(x))
     tmp["wd"] = tmp.name.apply(lambda x: extract_wd(x))
     tmp["lambda"] = tmp.name.apply(lambda x: extract_lambda(x))
+    tmp["ks"] = tmp.name.apply(lambda x: extract_ks(x))
+    tmp["bs"] = tmp.name.apply(lambda x: extract_bs(x))
     tmp = tmp[tmp["data"] == data]
 
     # selection process
@@ -208,12 +230,6 @@ def compute_weighted_acc(df):
     for i in df.index:
         cm = df.loc[i, "confusion_matrix"]
         cm = np.array(ast.literal_eval(cm))
-        if 'tnbc' in df.data.values[0]:
-            for i in range(3):
-                cm[3, i] = cm[3:,i].sum()
-                cm[i, 3] = cm[i,3:].sum()
-            cm[3,3] = cm[3:,3:].sum()
-            cm = cm[0:4,0:4]
         recalls = []
         precision = []
         f_score = []
@@ -282,7 +298,7 @@ def merge_all(performance, data, average=True):
                 + " \pm "
                 + f"{fone_std * 100:.1f}"
             )
-            for var in ["test_score", "knnscoreK=5", "knnscoreK=20", "knnscoreK=40", "knnscoreK=80"]:
+            for var in ["test_score"]:
                     
                 tmpi_mean[var + "_std"] = (
                     f"{tmpi_mean[var].values[0] * 100:.1f}"
@@ -298,6 +314,29 @@ def merge_all(performance, data, average=True):
     results = pd.concat(final_table)
     return results
 
+def make_name(backbone, type_, size):
+    if type_ == "Us":
+        return "Manual"
+    elif type_ == "pretrained":
+        name = "Pre-trained ResNet"
+        if size == "Size":
+            name += " + S"
+        if "padded" in backbone:
+            name += " + M"
+        return name
+    else:
+        if type_ == "S":
+            name = "SRN"
+        else:
+            name = type_ + " + SRN"
+        sdcl = " + SD-CL" if "SDRN" in backbone else ""        
+        m = " + M" if "padded" in backbone else ""
+        s = " + S" if size == "Size" else ""
+        return name + sdcl + m + s
+    
+def name_mapping(df):
+    df["method"] = df.apply(lambda x: make_name(x["backbone"], x["type"], x["inject_size"]), axis=1)
+    return df
 
 def main():
     tmp = pd.read_csv(sys.argv[1], index_col=0)
@@ -316,10 +355,6 @@ def main():
                 "prec_std",
                 "fscore_std",
                 "test_score_std",
-                # "knnscoreK=5_std",
-                # "knnscoreK=20_std",
-                # "knnscoreK=40_std",
-                # "knnscoreK=80_std",
                 "max_training",
             ]
         ]
@@ -330,12 +365,8 @@ def main():
             "inject_size",
             "recall ({})".format(data),
             "precision ({})".format(data),
-            "fscore ({})".format(data),
-            "Linear ({})".format(data),
-            # "kNN (k=5) ({})".format(data),
-            # "kNN (k=20) ({})".format(data),
-            # "kNN (k=40) ({})".format(data),
-            # "kNN (k=80) ({})".format(data),
+            "F1 ({})".format(data),
+            "Accuracy ({})".format(data),
             "Selection_score",
         ]
         tabs.append(tmp)
@@ -343,21 +374,13 @@ def main():
     for i in range(1, len(tabs)):
         final = final.merge(tabs[i], on=["backbone", "type", "inject_size"])
         final.drop(["name_x", "name_y"], axis=1, inplace=True)
-    cols = ['backbone', 'type', 'inject_size', 'recall (tnbc)', 'precision (tnbc)', 'fscore (tnbc)', 'Linear (tnbc)', 'recall (consep)', 'precision (consep)', 'fscore (consep)', 'Linear (consep)']
-    import pdb; pdb.set_trace()
-    only_kcolumns = ['backbone', 'type', 'inject_size',
-       'kNN (k=5) (tnbc)', 
-       'kNN (k=20) (tnbc)', 
-       'kNN (k=40) (tnbc)',
-       'kNN (k=80) (tnbc)', 
-       'kNN (k=5) (consep)', 
-       'kNN (k=20) (consep)', 
-       'kNN (k=40) (consep)',
-       'kNN (k=80) (consep)']
-    cols = ['backbone', 'type', 'inject_size', 'recall (tnbc)', 'Linear (tnbc)', 'kNN (k=40) (tnbc)', 'recall (consep)', 'Linear (consep)', 'kNN (k=40) (consep)',"Selection_score_x", "Selection_score_y"]
-    final.to_csv("./paper_results.csv", index=False, sep=";")
-    final = final.loc[[0, 1, 2, 3, 4, 5, 8, 9, 12, 6, 7, 10, 11, 13], :]
-    final[only_kcolumns]
+    
+    final = name_mapping(final)
+    final = final.drop(["name", "backbone", "type", "inject_size", "Selection_score"], axis=1)
+    final = final.sort_values("method")
+    final = final.set_index("method", drop=True)
+    final.to_csv("./paper_results.csv", sep=",")
+    
 
 if __name__ == "__main__":
     main()

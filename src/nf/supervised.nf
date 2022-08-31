@@ -74,7 +74,7 @@ process supervised_extraction {
     script:
         bs = BS[DATA][bs_int]
         epoch = EPOCH[DATA]
-        NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}_${KS}_${bs}_supervised"
+        NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}_${KS}_${bs}"
         """
         python $s_learning --data_path $DATA_npy --data_info $DATA_csv \
                         --batch_size $bs --workers 8 --epochs $epoch \
