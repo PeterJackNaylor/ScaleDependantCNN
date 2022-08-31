@@ -76,9 +76,9 @@ process ssl_moco {
                         --data_info ${DATA_csv} \
                         --arch $MODEL_NAME -j 6 \
                         --name $NAME --ks $KS \
-                        --batch-size $BS \
+                        --batch-size $bs \
                         --memory-bank $MB \
-                        --epochs $EPOCH --output . \
+                        --epochs $epoch --output . \
                         --gpu 0 \
                         --lr $LR --wd $WD $OPT
         """
