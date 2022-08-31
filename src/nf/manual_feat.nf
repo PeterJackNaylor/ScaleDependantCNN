@@ -102,7 +102,7 @@ workflow manual {
         repetition
     main:
         stepwise_selection(manual_features, selection_methods, 1..repetition)
-        stepwise_selection.out.groupTuple(by: 0).map{it -> [it[0].split('_')[0], it[1], it[2], it[3], it[4]] }.combine(manual_features, by: 0).set{ss_by_repeats}
+        stepwise_selection.out.groupTuple(by: 0).map{it -> [it[0].split('_')[0], it[1], it[2], it[3]] }.combine(manual_features, by: 0).set{ss_by_repeats}
         cross_selection(ss_by_repeats, pymanual)
     emit:
         manual_encoding = cross_selection.out[0]
