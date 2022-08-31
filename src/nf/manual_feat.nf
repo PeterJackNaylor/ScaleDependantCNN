@@ -57,7 +57,7 @@ process cross_selection {
     publishDir "${DATA}_output/cross_selection", mode: 'symlink'
 
     input:
-        tuple val(DATA), path(select), path(train), path(test), path(knn), path(DATA_csv), path(DATA_npy)
+        tuple val(DATA), path(select), path(train), path(test), path(DATA_csv), path(DATA_npy)
         each PY
     output:
         tuple val("${DATA}${tag}"), path("${DATA}_*data.csv"), path(DATA_csv)
@@ -65,7 +65,7 @@ process cross_selection {
     script:
         tag = "cs_${PY.baseName}"
         """
-        python $PY $DATA ${DATA_csv} ${select[0]} ${select[1]} ${knn[0]} ${knn[1]} ${train[0]} ${train[1]}  ${test[0]} ${test[1]} 
+        python $PY $DATA ${DATA_csv} ${select[0]} ${select[1]} ${train[0]} ${train[1]}  ${test[0]} ${test[1]} 
         """
 }
 
