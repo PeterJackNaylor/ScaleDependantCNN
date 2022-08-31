@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 from evaluation_function import nn_linear
 
-def add_feature(X, X2, y, y2, sf, c):
+def add_feature(X, X2, y, y2, sf):
     indexes = []
     train_scores_index = []
     test_scores_index = []
