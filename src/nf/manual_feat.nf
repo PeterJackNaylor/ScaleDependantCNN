@@ -43,7 +43,7 @@ process stepwise_selection {
         each TYPE
         each REP
     output:
-        tuple val("${DATA}_${REP}"), path("selected_feat_${TYPE}.npy"), path("train_score_${TYPE}.npy"), path("test_score_${TYPE}.npy"), path("knn_score_${TYPE}.npy")
+        tuple val("${DATA}_${REP}"), path("selected_feat_${TYPE}.npy"), path("train_score_${TYPE}.npy"), path("test_score_${TYPE}.npy")
     script:
         """
         python $manual_selection ${DATA} ./ $TYPE

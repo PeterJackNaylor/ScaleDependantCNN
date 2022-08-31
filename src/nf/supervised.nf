@@ -59,7 +59,10 @@ process supervised_extraction {
         each REP
         each LR
         each WD
-        val KS
+        each KS
+        val EPOCH
+        val BS
+        each bs_int
     output:
         tuple val("${NAME}_supervised"), path("${NAME}_supervised.csv"), path(DATA_csv)
         path("${NAME}_supervised_training_statistics.csv")
@@ -69,20 +72,12 @@ process supervised_extraction {
         !(DATA.contains("padded")) || (MODEL_NAME == "ModelSRN")
 
     script:
-        NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}"
-        if ("${DATA}" == "pannuke"){
-            BS = 512
-            EPOCH = 20
-        } else {
-            BS = 128
-            EPOCH = 50
-        }
-        if (("${DATA}").contains("padded")){
-            BS = 64
-        }
+        bs = BS[DATA][bs_int]
+        epoch = EPOCH[DATA]
+        NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}_${KS}_${bs}_supervised"
         """
         python $s_learning --data_path $DATA_npy --data_info $DATA_csv \
-                        --batch_size $BS --workers 8 --epochs $EPOCH \
+                        --batch_size $bs --workers 8 --epochs $epoch \
                         $OPT --model_name $MODEL_NAME --wd $WD\
                         --lr $LR --output ./ --name $NAME --ks $KS 
                     

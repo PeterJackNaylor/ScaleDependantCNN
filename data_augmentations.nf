@@ -1,8 +1,8 @@
 
 
 include { extraction; manual; add_padding_mask } from './src/nf/manual_feat'
-include { ssl_bt_transform } from './src/nf/self_supervised'
-include { LR_KNN_evaluation } from './src/nf/evaluation'
+include { ssl_bt } from './src/nf/self_supervised'
+include { Evaluation } from './src/nf/evaluation'
 
 // parameters
 LAMBDA = [0.0078125]
@@ -11,7 +11,11 @@ WD = [1e-6]
 FEATURE_DIM = [64] 
 models = ["ModelSDRN"]
 opt = ["--no_size"]
+epochs = [ "tnbc": 100, "consep": 100, "pannuke": 50, "tnbcpadded": 100, "conseppadded": 100, "pannukepaddded": 50]
+bs = [ "tnbc": [128], "consep": [128], "pannuke": [512], "tnbcpadded": [64], "conseppadded": [64], "pannukepadded": [64]]
+number_bs = [0]
 augmentations = ["normal", "vanilla", "autocontrast", "jittersmall", "jittermed", "jitterlarge", "jitterverylarge", "greyscale"]
+
 repetition = 20
 
 aug_exp = file("src/python/aug_plot.py")
@@ -41,8 +45,8 @@ workflow {
         extraction(dataset)
         ext = extraction.out
 
-        ssl_bt_transform(ext, models, opt, LAMBDA, FEATURE_DIM, 1..repetition, LR, WD, augmentations)
-        LR_KNN_evaluation(ssl_bt_transform.out[0])
-        plot(LR_KNN_evaluation.out.collectFile(skip: 1, keepHeader: true).collect(), 
-            ssl_bt_transform.out[1].collectFile(skip: 1, keepHeader: true).collect())
+        ssl_bt(ext, models, opt, LAMBDA, FEATURE_DIM, 1..repetition, LR, WD, KS, epochs, bs, number_bs, augmentations)
+        Evaluation(ssl_bt.out[0])
+        plot(Evaluation.out.collectFile(skip: 1, keepHeader: true).collect(), 
+            ssl_bt.out[1].collectFile(skip: 1, keepHeader: true).collect())
 }

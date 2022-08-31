@@ -115,6 +115,16 @@ consep_mapping = {
     7: 5,
 }
 
+tnbc_mapping = {
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 4,
+    6: 4,
+    7: 4,
+}
+
 
 if __name__ == "__main__":
     parser = OptionParser()
@@ -217,6 +227,7 @@ if __name__ == "__main__":
         # drop necrosis and myoepithelial
         res["name"] = res["name"].astype(int)
         res = res[~(res["Label"].isin([8, 11]))]
+        res["Label"] = res.apply(lambda x: tnbc_mapping[x["Label"]], axis=1)
         idx_train = res[~res["name"].isin([1, 9, 14])].index
         idx_test = res[res["name"].isin([1, 9, 14])].index
         res.loc[idx_train, "fold"] = "train"

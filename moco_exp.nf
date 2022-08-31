@@ -1,7 +1,7 @@
 
 include { extraction; manual; add_padding_mask } from './src/nf/manual_feat'
 include { ssl_moco; ssl_bt } from './src/nf/self_supervised'
-include { LR_KNN_evaluation } from './src/nf/evaluation'
+include { Evaluation } from './src/nf/evaluation'
 
 
 // data
@@ -21,6 +21,12 @@ BS = [256]
 EPOCH = 30
 models = ["ModelSRN"]
 opt = ["--no_size"]
+
+BS_RANGE = [128, 512, 1024]
+number_bs = 0..2
+epochs = [ "tnbc": 100, "consep": 100]
+bs = [ "tnbc": BS_RANGE, "consep": BS_RANGE]
+
 repetition = 2
 
 moco_exp = file("src/python/moco_plot.py")
@@ -46,9 +52,9 @@ workflow {
         extraction(dataset)
         ext = extraction.out
 
-        ssl_moco(ext, models, opt, 1..repetition, LR, WD, MB, BS, EPOCH)
-        LR_KNN_evaluation(ssl_moco.out[0])
+        ssl_moco(ext, models, opt, 1..repetition, LR, WD, MB, KS, epoch, bs, number_bs)
+        Evaluation(ssl_moco.out[0])
 
-        plot(LR_KNN_evaluation.out.collectFile(skip: 1, keepHeader: true).collect(), 
+        plot(Evaluation.out.collectFile(skip: 1, keepHeader: true).collect(), 
             ssl_moco.out[1].collectFile(skip: 1, keepHeader: true).collect())
 }

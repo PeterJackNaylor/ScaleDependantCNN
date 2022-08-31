@@ -1,7 +1,7 @@
 import pandas as pd
 import sys
 import numpy as np
-from evaluation_function import nn_linear_prediction, knn_evaluation
+from evaluation_function import nn_linear_prediction
 
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix
 
@@ -39,13 +39,6 @@ results = pd.DataFrame(
     },
     index=[0],
 )
-for k in [5, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]:
-    knn_score, knn_score3 = knn_evaluation(
-        x_train, y_train, x_test, y_test, c=len(np.unique(y_train)), k=k
-    )
-    results[f"knnscoreK={k}"] = knn_score
-    results[f"knnscore3K={k}"] = knn_score3
-
 
 precision, recall, fscore, support = precision_recall_fscore_support(y_test, y_test_pred.argmax(axis=1), labels=labels, average=None)
 

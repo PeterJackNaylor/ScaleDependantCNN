@@ -1,7 +1,7 @@
 
 evaluate = file("src/python/evaluate.py")
 
-process LR_KNN_evaluation {
+process Evaluation {
     input:
         tuple val(tag), path(Xy), path(CSV)
     output:
@@ -35,8 +35,8 @@ workflow evaluation {
         training_score
     main:
 
-        LR_KNN_evaluation(encodings)
+        Evaluation(encodings)
 
-        LR_KNN_evaluation.out.collectFile(name: "./paper_output/performance.csv", skip: 1, keepHeader: true) .set{test_score}
+        Evaluation.out.collectFile(name: "./paper_output/performance.csv", skip: 1, keepHeader: true) .set{test_score}
         publish(test_score, training_score)
 }

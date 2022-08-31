@@ -20,14 +20,15 @@ def fit_nn(X, y, lr=0.001, wd=1e-6, max_epochs=100, tol=1e-5):
     model = Net(size=X.shape[1], num_class=np.unique(y).shape[0])
     model.train()
     weights = (1 - torch.from_numpy(np.unique(y, return_counts=True)[1] / y.shape[0])).float()
-    criterion = nn.CrossEntropyLoss(weight=weights)
-    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
     # Converting inputs and labels to Variable
     if torch.cuda.is_available():
         X = X.cuda()
         y = y.cuda()
+        weights = weights.cuda()
         model.cuda()
 
+    criterion = nn.CrossEntropyLoss(weight=weights)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
     last_loss = 1e10
     
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
