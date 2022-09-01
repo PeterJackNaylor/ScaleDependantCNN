@@ -17,7 +17,7 @@ BS = [256, 512, 1024]
 LR = [0.001]
 WD = [0]
 MB = [4096, 65536]
-
+KS = [3]
 
 models = ["ModelSRN"]
 opt = ["--no_size"]
