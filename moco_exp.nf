@@ -17,8 +17,8 @@ BS = [256, 512, 1024]
 LR = [0.001]
 WD = [0]
 MB = [4096, 65536]
-BS = [256]
-EPOCH = 30
+
+
 models = ["ModelSRN"]
 opt = ["--no_size"]
 
