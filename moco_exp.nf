@@ -52,7 +52,7 @@ workflow {
         extraction(dataset)
         ext = extraction.out
 
-        ssl_moco(ext, models, opt, 1..repetition, LR, WD, MB, KS, epoch, bs, number_bs)
+        ssl_moco(ext, models, opt, 1..repetition, LR, WD, MB, KS, epochs, bs, number_bs)
         Evaluation(ssl_moco.out[0])
 
         plot(Evaluation.out.collectFile(skip: 1, keepHeader: true).collect(), 
