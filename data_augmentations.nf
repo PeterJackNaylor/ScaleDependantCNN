@@ -19,7 +19,7 @@ number_bs = [0]
 
 augmentations = ["normal", "vanilla", "autocontrast", "jittersmall", "jittermed", "jitterlarge", "jitterverylarge", "greyscale"]
 
-repetition = 20
+repetition = 2
 
 aug_exp = file("src/python/aug_plot.py")
 
