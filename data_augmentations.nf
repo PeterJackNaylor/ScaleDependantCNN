@@ -9,11 +9,14 @@ LAMBDA = [0.0078125]
 LR = [0.001]
 WD = [1e-6]
 FEATURE_DIM = [64] 
+KS = [3]
+
 models = ["ModelSDRN"]
 opt = ["--no_size"]
 epochs = [ "tnbc": 100, "consep": 100, "pannuke": 50, "tnbcpadded": 100, "conseppadded": 100, "pannukepaddded": 50]
 bs = [ "tnbc": [128], "consep": [128], "pannuke": [512], "tnbcpadded": [64], "conseppadded": [64], "pannukepadded": [64]]
 number_bs = [0]
+
 augmentations = ["normal", "vanilla", "autocontrast", "jittersmall", "jittermed", "jitterlarge", "jitterverylarge", "greyscale"]
 
 repetition = 20
