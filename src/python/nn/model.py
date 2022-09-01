@@ -9,6 +9,7 @@ from ssdresnet import Model_backbone as ModelSDRN_backbone
 def fetch_model(
     name="ModelSRN",
     num_classes=2,
+    kernel_size=3,
     inject_size=False,
     gpu=False,
 ):
@@ -17,8 +18,9 @@ def fetch_model(
         model = ModelSRN(
             BasicBlock,
             layers,
-            num_classes,
-            inject_size,
+            num_classes=num_classes,
+            inject_size=inject_size,
+            kernel_size=kernel_size
         )
 
     elif name == "ModelSDRN":
@@ -26,8 +28,9 @@ def fetch_model(
         model = ModelSDRN(
             BasicBlock,
             layers,
-            num_classes,
-            inject_size,
+            num_classes=num_classes,
+            inject_size=inject_size,
+            kernel_size=kernel_size,
             scale_factor=3,
             gpu=gpu,
         )
@@ -37,15 +40,17 @@ def fetch_model(
 def fetch_model_ssl(
     name,
     inject_size,
-    feature_dim,
-    gpu,
+    kernel_size=3,
+    feature_dim=64,
+    gpu=False,
 ):
     if name == "ModelSRN":
         layers = [3, 4, 3]
         model = ModelSRN_ssl(
             BasicBlock,
             layers,
-            inject_size,
+            inject_size=inject_size,
+            kernel_size=kernel_size,
             feature_dim=feature_dim,
         )
 
@@ -54,7 +59,8 @@ def fetch_model_ssl(
         model = ModelSDRN_ssl(
             BasicBlock,
             layers,
-            inject_size,
+            inject_size=inject_size,
+            kernel_size=kernel_size,
             feature_dim=feature_dim,
             scale_factor=3,
             gpu=gpu,
@@ -65,6 +71,7 @@ def fetch_model_ssl(
 def fetch_backbone(
     name="ModelSRN",
     num_classes=2,
+    kernel_size=3,
     inject_size=False,
     gpu=False,
 ):
@@ -73,8 +80,9 @@ def fetch_backbone(
         model = ModelSRN_backbone(
             BasicBlock,
             layers,
-            num_classes,
-            inject_size,
+            num_classes=num_classes,
+            inject_size=inject_size,
+            kernel_size=kernel_size,
             gpu=gpu,
         )
 
@@ -83,8 +91,9 @@ def fetch_backbone(
         model = ModelSDRN_backbone(
             BasicBlock,
             layers,
-            num_classes,
-            inject_size,
+            num_classes=num_classes,
+            inject_size=inject_size,
+            kernel_size=kernel_size,
             scale_factor=3,
             gpu=gpu,
         )

@@ -89,6 +89,7 @@ class Model(nn.Module):
         self,
         block,
         layers,
+        kernel_size=3,
         num_classes=1000,
         inject_size=True,
         input_size=32,
@@ -100,14 +101,9 @@ class Model(nn.Module):
         self.inplanes = 32
         self.inject_size = inject_size
         self.size_block = SizeInvBlock(
-            3, self.inplanes, (3, 3), input_size, scale_factor, gpu
+            3, self.inplanes, (kernel_size, kernel_size), input_size, scale_factor, gpu
         )
-        self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
-        )
-        self.bn1 = nn.BatchNorm2d(self.inplanes)
-        self.relu = nn.ReLU(inplace=True)
-
+        
         self.layer1 = convolution_rn_block(block, 32, 32, layers[0])
         self.layer2 = convolution_rn_block(block, 32, 64, layers[1], stride=2)
         self.layer3 = convolution_rn_block(block, 64, 128, layers[2], stride=2)
@@ -144,6 +140,7 @@ class Model_ssl(nn.Module):
         self,
         block,
         layers,
+        kernel_size=3,
         inject_size=True,
         feature_dim=64,
         input_size=32,
@@ -155,14 +152,9 @@ class Model_ssl(nn.Module):
         self.inplanes = 32
         self.inject_size = inject_size
         self.size_block = SizeInvBlock(
-            3, self.inplanes, (3, 3), input_size, scale_factor, gpu
+            3, self.inplanes, (kernel_size, kernel_size), input_size, scale_factor, gpu
         )
 
-        self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
-        )
-        self.bn1 = nn.BatchNorm2d(self.inplanes)
-        self.relu = nn.ReLU(inplace=True)
 
         self.layer1 = convolution_rn_block(block, 32, 32, layers[0])
         self.layer2 = convolution_rn_block(block, 32, 64, layers[1], stride=2)
@@ -206,6 +198,7 @@ class Model_backbone(nn.Module):
         self,
         block,
         layers,
+        kernel_size=3,
         num_classes=1000,
         inject_size=True,
         input_size=32,
@@ -218,13 +211,10 @@ class Model_backbone(nn.Module):
         self.inplanes = 32
         self.inject_size = inject_size
         self.size_block = SizeInvBlock(
-            3, self.inplanes, (3, 3), input_size, scale_factor, gpu
+            3, self.inplanes, (kernel_size, kernel_size), input_size, scale_factor, gpu
         )
-        self.conv1 = nn.Conv2d(
-            3, self.inplanes, kernel_size=3, stride=1, padding=1, bias=False
-        )
-        self.bn1 = nn.BatchNorm2d(self.inplanes)
-        self.relu = nn.ReLU(inplace=True)
+        
+
 
         self.layer1 = convolution_rn_block(block, 32, 32, layers[0])
         self.layer2 = convolution_rn_block(block, 32, 64, layers[1], stride=2)

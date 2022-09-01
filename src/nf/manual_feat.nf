@@ -2,7 +2,7 @@
 pyf = "src/python/manual"
 
 manual_extraction = file("${pyf}/main.py")
-pannuke_extraction = file("${pyf}/pannuke_extraction.py")
+pannuke_extraction = file("${pyf}/pannuke_main.py")
 merge = file("${pyf}/merge.py")
 
 process extraction {
@@ -43,7 +43,7 @@ process stepwise_selection {
         each TYPE
         each REP
     output:
-        tuple val("${DATA}_${REP}"), path("selected_feat_${TYPE}.npy"), path("train_score_${TYPE}.npy"), path("test_score_${TYPE}.npy"), path("knn_score_${TYPE}.npy")
+        tuple val("${DATA}_${REP}"), path("selected_feat_${TYPE}.npy"), path("train_score_${TYPE}.npy"), path("test_score_${TYPE}.npy")
     script:
         """
         python $manual_selection ${DATA} ./ $TYPE
@@ -57,7 +57,7 @@ process cross_selection {
     publishDir "${DATA}_output/cross_selection", mode: 'symlink'
 
     input:
-        tuple val(DATA), path(select), path(train), path(test), path(knn), path(DATA_csv), path(DATA_npy)
+        tuple val(DATA), path(select), path(train), path(test), path(DATA_csv), path(DATA_npy)
         each PY
     output:
         tuple val("${DATA}${tag}"), path("${DATA}_*data.csv"), path(DATA_csv)
@@ -65,8 +65,34 @@ process cross_selection {
     script:
         tag = "cs_${PY.baseName}"
         """
-        python $PY $DATA ${DATA_csv} ${select[0]} ${select[1]} ${knn[0]} ${knn[1]} ${train[0]} ${train[1]}  ${test[0]} ${test[1]} 
+        python $PY $DATA ${DATA_csv} ${select[0]} ${select[1]} ${train[0]} ${train[1]}  ${test[0]} ${test[1]} 
         """
+}
+
+pad_mask = file("${pyf}/pad_mask.py")
+
+process padding_mask {
+    input:
+        tuple val(DATAn), path(DATAcsv), path(DATAnpy)
+        val SIZE
+    output:
+        tuple val("${DATAn}padded"), path(DATAcsv), path("${DATAn}_tinycells_paddedmask.npy")
+    script:
+        """
+        python $pad_mask ${DATAnpy} ${DATAcsv} ${SIZE}
+        """
+
+}
+
+workflow add_padding_mask {
+    take:
+        manual_features
+        size
+    main:
+        padding_mask(manual_features, size)
+        padding_mask.out.concat(manual_features).set{output}
+    emit:
+        output
 }
 
 workflow manual {
@@ -76,7 +102,7 @@ workflow manual {
         repetition
     main:
         stepwise_selection(manual_features, selection_methods, 1..repetition)
-        stepwise_selection.out.groupTuple(by: 0).map{it -> [it[0].split('_')[0], it[1], it[2], it[3], it[4]] }.combine(manual_features, by: 0).set{ss_by_repeats}
+        stepwise_selection.out.groupTuple(by: 0).map{it -> [it[0].split('_')[0], it[1], it[2], it[3]] }.combine(manual_features, by: 0).set{ss_by_repeats}
         cross_selection(ss_by_repeats, pymanual)
     emit:
         manual_encoding = cross_selection.out[0]

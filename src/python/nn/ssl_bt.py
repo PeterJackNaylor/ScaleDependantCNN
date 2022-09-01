@@ -43,7 +43,7 @@ def options():
     )
     parser.add_argument(
         "--k",
-        default=200,
+        default=40,
         type=int,
         help="Top k most similar images used to predict the label",
     )
@@ -58,6 +58,12 @@ def options():
         default=1000,
         type=int,
         help="Number of sweeps over the dataset to train",
+    )
+    parser.add_argument(
+        "--ks",
+        default=3,
+        type=int,
+        help="kernel size for the first layer",
     )
     parser.add_argument(
         "--output",
@@ -123,6 +129,10 @@ def options():
         dest="inject_size",
         action="store_false",
     )
+    parser.add_argument(
+        "--transforms_type",
+        default="normal",
+    )
     parser.set_defaults(corr_neg_one=False)
 
     # args parse
@@ -149,12 +159,14 @@ if __name__ == "__main__":
         data_inject_size,
         opt.batch_size,
         opt.workers,
+        opt.transforms_type,
         ssl=True,
     )
     # model setup and optimizer config
     model = fetch_model_ssl(
         opt.model_name,
         opt.inject_size,
+        opt.ks,
         opt.feature_dim,
         gpu,
     )

@@ -15,22 +15,27 @@ process ssl_bt {
         each REP
         each LR
         each WD
+        each KS
+        val EPOCH
+        val BS
+        each bs_int
+        each AUG
     output:
         tuple val("${NAME}_ssl"), path("*_ssl.csv"), path(DATA_csv)
         path("${NAME}_ssl_training_statistics.csv")
+
+    when:
+        !(DATA.contains("padded")) || (MODEL_NAME == "ModelSRN")
+
     script:
-        NAME = "${DATA}_${MODEL_NAME}_${OPT}_LAMB-${LAMBD}_FDIM-${FDIM}_${LR}_${WD}"
-        if ("${DATA}" == "pannuke"){
-            BS = 512
-            EPOCH = 50
-        } else {
-            BS = 128
-            EPOCH = 100
-        }
+        bs = BS[DATA][bs_int]
+        epoch = EPOCH[DATA]
+        NAME = "${DATA}_${MODEL_NAME}_${OPT}_LAMB-${LAMBD}_FDIM-${FDIM}_${LR}_${WD}_${KS}_${bs}_${AUG}"
         """
+
     	python ${bt_training} --lmbda ${LAMBD} --corr_zero \
-                        --batch_size $BS --feature_dim ${FDIM} \
-                        --epochs $EPOCH --output . \
+                        --batch_size $bs --feature_dim ${FDIM} \
+                        --epochs $epoch --output . --ks $KS \
                         --model_name $MODEL_NAME --name $NAME \
                         --data_path ${DATA_npy} --data_info ${DATA_csv} \
                         --workers 8 --lr $LR --wd $WD $OPT
@@ -50,25 +55,30 @@ process ssl_moco {
         each REP
         each LR
         each WD
+        each MB
+        each KS
+        val EPOCH
+        val BS
+        each bs_int
     output:
         tuple val("${NAME}"), path("*_moco.csv"), path(DATA_csv)
         path("${NAME}_training_statistics.csv")
+
+    when:
+        !(DATA.contains("padded")) || (MODEL_NAME == "ModelSRN")
+
     script:
-        NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}_moco"
-        if ("${DATA}" == "pannuke"){
-            BS = 512
-            EPOCH = 50
-        } else {
-            BS = 256
-            EPOCH = 100
-        }
+        bs = BS[DATA][bs_int]
+        epoch = EPOCH[DATA]
+        NAME = "${DATA}_${MODEL_NAME}_${OPT}_${LR}_${WD}_${KS}_${MB}_${bs}_moco"
         """
     	python ${moco_training} --data_path ${DATA_npy} \
                         --data_info ${DATA_csv} \
                         --arch $MODEL_NAME -j 6 \
-                        --name $NAME \
-                        --batch-size $BS \
-                        --epochs $EPOCH --output . \
+                        --name $NAME --ks $KS \
+                        --batch-size $bs \
+                        --memory-bank $MB \
+                        --epochs $epoch --output . \
                         --gpu 0 \
                         --lr $LR --wd $WD $OPT
         """

@@ -1,6 +1,7 @@
 # Note: The model and training settings do not follow the reference settings
 # from the paper. The settings are chosen such that the example can easily be
 # run on a small dataset with a single GPU.
+from ast import arg
 from os.path import join
 import torch
 from torch import nn
@@ -15,7 +16,7 @@ from lightly.loss import NTXentLoss
 from lightly.models.modules import MoCoProjectionHead
 from lightly.models.utils import deactivate_requires_grad
 from lightly.models.utils import update_momentum
-from cell_data import Transform, CAM32
+from cell_data import PairTransform, CAM32
 from model import fetch_backbone
 import pandas as pd
 from test import test_moco, get_encoding_moco
@@ -146,6 +147,14 @@ parser.add_argument(
     "using Data Parallel or Distributed Data Parallel",
 )
 parser.add_argument(
+    "-mb",
+    "--memory-bank",
+    default=4096,
+    type=int,
+    metavar="N",
+    help="memory bank size (default: 4096)",
+)
+parser.add_argument(
     "--lr",
     "--learning-rate",
     default=0.03,
@@ -184,6 +193,12 @@ parser.add_argument(
     "--no_size",
     dest="inject_size",
     action="store_false",
+)
+parser.add_argument(
+    "--ks",
+    default=3,
+    type=int,
+    help="kernel size for the first layer",
 )
 parser.add_argument(
     "--name",
@@ -242,17 +257,17 @@ parser.add_argument(
 )
 parser.add_argument(
     "--k",
-    default=200,
+    default=40,
     type=int,
     help="Top k most similar images used to predict the label",
 )
 
 args = parser.parse_args()
 
-
 def cam_loader(
     data_path,
     data_info,
+    img_size,
     train,
     transform,
     size,
@@ -275,7 +290,7 @@ def cam_loader(
     # dataset = LightlyDataset("path/to/folder")
 
     collate_fn = MyMoCoCollateFunction(
-        input_size=32,
+        input_size=img_size,
         cj_prob=0,
         random_gray_scale=0,
         gaussian_blur=0,
@@ -299,6 +314,7 @@ def cam_loader(
 def cam_memory_train(
     data_path,
     data_info,
+    img_size,
     train,
     transform,
     size,
@@ -321,7 +337,7 @@ def cam_memory_train(
     # dataset = LightlyDataset("path/to/folder")
 
     collate_fn = MyMoCoCollateFunction(
-        input_size=32,
+        input_size=img_size,
         cj_prob=0,
         random_gray_scale=0,
         gaussian_blur=0,
@@ -375,7 +391,9 @@ data_info = args.data_info
 batch_size = args.batch_size
 num_workers = args.workers
 
-srn = fetch_backbone(name, 2, inject_size, device)
+imgsize = np.load(data_path).shape[1]
+
+srn = fetch_backbone(name, 2, args.ks, inject_size, device)
 model = MoCo(srn)
 
 model.to(device)
@@ -384,8 +402,9 @@ model.to(device)
 train_cam = cam_loader(
     data_path,
     data_info,
+    imgsize,
     train=True,
-    transform=Transform(train_transform=True),
+    transform=PairTransform(train_transform=True, pair_transform=False, size=imgsize),
     size=inject_size,
     split=("train", 0.2, 42),
     batch_size=batch_size,
@@ -397,8 +416,9 @@ c = len(train_cam.dataset.dataset.classes)
 train_cam_memory = cam_memory_train(
     data_path,
     data_info,
+    imgsize,
     train=True,
-    transform=Transform(train_transform=True),
+    transform=PairTransform(train_transform=True, pair_transform=False, size=imgsize),
     size=inject_size,
     split=("train", 0.2, 42),
     batch_size=batch_size,
@@ -409,8 +429,9 @@ train_cam_memory = cam_memory_train(
 val_cam = cam_loader(
     data_path,
     data_info,
+    imgsize,
     train=False,
-    transform=Transform(train_transform=False),
+    transform=PairTransform(train_transform=False, pair_transform=False, size=imgsize),
     size=inject_size,
     split=("val", 0.2, 42),
     batch_size=batch_size,
@@ -420,8 +441,9 @@ val_cam = cam_loader(
 test_cam = cam_loader(
     data_path,
     data_info,
+    imgsize,
     train=False,
-    transform=Transform(train_transform=False),
+    transform=PairTransform(train_transform=False, pair_transform=False, size=imgsize),
     size=inject_size,
     split=(),
     batch_size=batch_size,
@@ -429,7 +451,7 @@ test_cam = cam_loader(
     everyone=True,
 )
 
-criterion = NTXentLoss(memory_bank_size=4096)
+criterion = NTXentLoss(memory_bank_size=args.memory_bank)
 optimizer = torch.optim.Adam(
     model.parameters(), lr=args.lr, weight_decay=args.weight_decay
 )
@@ -451,11 +473,11 @@ for epoch in trange(1, args.epochs + 1):
             (x_query, x_key), _, _, h, w = batch
         else:
             (x_query, x_key), _, _ = batch
-        update_momentum(model.backbone, model.backbone_momentum, m=0.99)
+        update_momentum(model.backbone, model.backbone_momentum, m=args.moco_m)
         update_momentum(
             model.projection_head,
             model.projection_head_momentum,
-            m=0.99,
+            m=args.moco_m,
         )
         x_query = x_query.to(device)
         x_key = x_key.to(device)

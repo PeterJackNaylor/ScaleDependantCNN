@@ -50,8 +50,8 @@ def check_or_create(path):
         os.makedirs(path)
 
 
-def gene_data(p, datatype="lizard"):
-    if datatype == "lizard":
+def gene_data(p, datatype="pannuke"):
+    if datatype == "pannuke":
         for fold in ["fold1", "fold2", "fold3"]:
             rgbs = np.load(os.path.join(p, "images", fold, "images.npy"))
             masks = np.load(os.path.join(p, "masks", fold, "masks.npy"))

@@ -2,7 +2,7 @@ from tqdm import tqdm
 import torch
 from train import step_function
 
-from selection_knn import knn_evaluation
+from evaluation_function import knn_evaluation
 
 
 def accuracy(output: torch.Tensor, target: torch.Tensor, topk=(1,)):

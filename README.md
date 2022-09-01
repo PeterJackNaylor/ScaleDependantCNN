@@ -13,6 +13,7 @@ For pytorch and torchvision, please be sure to take compatible versions.
 Please modify the `nextflow.config` to meet the specificities of your informatics setup.
 We used a SGE cluster provided by RIKEN AIP with CPU and GPU queues. 
 Processing the PanNuke dataset requires more memory and computational power then the others, if you are limited in this regard, please remove this dataset from the `benchmark.nf` file.
+
 ## Reproduce results in paper
 Please run the commands in this order:
 ``` bash

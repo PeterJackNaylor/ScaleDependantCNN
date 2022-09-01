@@ -34,7 +34,7 @@ def options():
     )
     parser.add_argument(
         "--k",
-        default=200,
+        default=40,
         type=int,
         help="Top k most similar images used to predict the label",
     )
@@ -55,6 +55,12 @@ def options():
         default=1000,
         type=int,
         help="Number of sweeps over the dataset to train",
+    )
+    parser.add_argument(
+        "--ks",
+        default=3,
+        type=int,
+        help="kernel size for the first layer",
     )
     parser.add_argument(
         "--inject_size",
@@ -120,7 +126,7 @@ def main():
     )
     # model setup and optimizer config
     model = fetch_model(
-        opt.model_name, len(train_loader.dataset.classes), opt.inject_size, gpu
+        opt.model_name, len(train_loader.dataset.classes), opt.ks, opt.inject_size, gpu
     )
     if data_inject_size:
         fake_input = (

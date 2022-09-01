@@ -17,15 +17,13 @@ def main():
     table[feat_name].to_csv(f"{sys.argv[1]}_descendingdata.csv")
 
     res = {
-        "ascending_knn": [np.load(sys.argv[5])[-1]],
-        "descending_knn": [np.load(sys.argv[6])[-1]],
         "ascending_selected": [len(sel1)],
         "descending_selected": [len(sel2)],
         "inter_selected": [len(feat_name)],
-        "ascending_train": [np.load(sys.argv[7])[-1]],
-        "descending_train": [np.load(sys.argv[8])[-1]],
-        "ascending_validation": [np.load(sys.argv[9])[-1]],
-        "descending_validation": [np.load(sys.argv[10])[-1]],
+        "ascending_train": [np.load(sys.argv[5])[-1]],
+        "descending_train": [np.load(sys.argv[6])[-1]],
+        "ascending_validation": [np.load(sys.argv[7])[-1]],
+        "descending_validation": [np.load(sys.argv[8])[-1]],
         "name": [sys.argv[1] + "_descending"],
     }
     pd.DataFrame.from_dict(res).to_csv(
