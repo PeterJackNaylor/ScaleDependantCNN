@@ -12,13 +12,13 @@ dataset = Channel.from([file("./data/tnbc")])
 LR = [0.0001, 0.001, 0.01]
 WD = [0, 1e-4, 1.0]
 MB = [4096, 16384, 65536]
-BS = [256, 512, 1024]
+KS = [3, 5]
 
 LR = [0.001]
 WD = [0]
 MB = [4096, 65536]
-BS = [256]
-EPOCH = 30
+KS = [3]
+
 models = ["ModelSRN"]
 opt = ["--no_size"]
 
@@ -52,7 +52,7 @@ workflow {
         extraction(dataset)
         ext = extraction.out
 
-        ssl_moco(ext, models, opt, 1..repetition, LR, WD, MB, KS, epoch, bs, number_bs)
+        ssl_moco(ext, models, opt, 1..repetition, LR, WD, MB, KS, epochs, bs, number_bs)
         Evaluation(ssl_moco.out[0])
 
         plot(Evaluation.out.collectFile(skip: 1, keepHeader: true).collect(), 

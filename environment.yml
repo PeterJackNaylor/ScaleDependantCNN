@@ -21,4 +21,5 @@ dependencies:
   - pip:                # everything under this, installed by pip
     - thop
     - lightly
+    - kaleido
 
