@@ -234,6 +234,7 @@ if __name__ == "__main__":
         res.loc[idx_test, "fold"] = "test"
         all_cells = all_cells[res.index]
         res = res.reset_index(drop=True)
+        res.index.name = 'index'
     elif options.type == "consep":
         label = options.name.split("_")[-1]
         res["fold"] = label
