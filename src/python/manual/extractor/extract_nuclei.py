@@ -159,7 +159,7 @@ def bin_extractor(
         bin_image = np.pad(
             bin_image,
             pad_width=((marge, marge), (marge, marge)),
-            mode="constant",
+            mode="symmetric",
         )
     bin_image_copy = bin_image.copy()
     if do_label:
