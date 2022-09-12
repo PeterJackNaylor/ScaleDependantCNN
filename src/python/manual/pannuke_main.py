@@ -140,13 +140,14 @@ if __name__ == "__main__":
     n_jobs = int(options.n_jobs)
     table_list = []
     cell_list = []
+    cell_mask_list = []
     last_index = 0
     n = 2656 + 2523 + 2722
     for rgb_, bin_, name, patch in tqdm(
         gene_data(options.folder, options.type), total=n
     ):
         list_f[-2].set_shift((-options.marge, -options.marge))
-        table, cells = bin_extractor(
+        table, cells, cell_mask = bin_extractor(
             rgb_,
             bin_,
             list_f,
@@ -166,6 +167,7 @@ if __name__ == "__main__":
 
         if table is not None:
             cell_list.append(cells)
+            cell_mask_list.append(cell_mask)
             n = table.shape[0]
             table["index"] = range(last_index, n + last_index)
             table.set_index(["index"], inplace=True)
@@ -183,5 +185,8 @@ if __name__ == "__main__":
     check_or_create(options.out_path)
     res.to_csv(os.path.join(options.out_path, options.name + ".csv"))
     all_cells = np.vstack(cell_list)
+    all_cells = all_cells[res.index]
+    all_cells_mask = np.vstack(cell_mask_list)
+    all_cells_mask = all_cells_mask[res.index]
     fname = os.path.join(options.out_path, options.name + "_tinycells.npy")
     np.save(fname, all_cells)

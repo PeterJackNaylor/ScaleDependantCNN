@@ -78,15 +78,18 @@ def check_within_margin(rgb_image, marge, cell_prop):
         return False
 
 
-def get_crop(rgb_image, bin_image, cell_prop, d=0):
+def get_crop(rgb_image, bin_image, cell_prop, d=0, dilate_bin=None):
     # d is the dilation resolution to pad to the image
     x_m, y_m, x_M, y_M = cell_prop.bbox
     r_rgb = rgb_image[(x_m - d):(x_M + d), (y_m - d):(y_M + d)]
     r_bin = bin_image[(x_m - d):(x_M + d), (y_m - d):(y_M + d)].copy()
     r_bin[r_bin != cell_prop.label] = 0
     r_bin[r_bin == cell_prop.label] = 1
-    if d > 0:
-        r_bin = dilate(r_bin, d)
+    if dilate_bin is None:
+        dilate_bin = d
+
+    if dilate_bin > 0:
+        r_bin = dilate(r_bin, dilate_bin)
     return r_rgb, r_bin
 
 
@@ -213,22 +216,36 @@ def bin_extractor(
                     bin_image_copy,
                     c,
                     d=cell_marge,
+                    dilate_bin=0,
                 )
+                bin_c *= 255
                 r_rgb = resize(
                     rgb_c, (cell_resize, cell_resize, 3), preserve_range=True
                 ).astype("uint8")
-                return r_rgb
+                r_bin = resize(
+                    bin_c, (cell_resize, cell_resize), order=0, preserve_range=True
+                ).astype("uint8")
+                r_bin[r_bin > 0] = 255
+                return r_rgb, r_bin
             else:
                 return None
 
         # cell_array = Parallel(n_jobs=n_jobs)
         # (delayed(task_resize)(i) for i in cell_list)
-        cell_array = [task_resize(i) for i in tqdm(cell_list, leave=False)]
-        cell_array = [el for el in cell_array if el is not None]
+        
+        cell_array_tuple = [task_resize(i) for i in tqdm(cell_list, leave=False)]
+        cell_array = [el[0] for el in cell_array_tuple if el is not None]
+        cell_mask_array = [el[1] for el in cell_array_tuple if el is not None]
         cell_array = np.stack(cell_array)
+        cell_mask_array = np.stack(cell_mask_array)
+
     else:
         cell_array = np.zeros(
             shape=(0, cell_resize, cell_resize, 3),
             dtype="uint8",
         )
-    return cell_matrix, cell_array
+        cell_mask_array = np.zeros(
+            shape=(0, cell_resize, cell_resize),
+            dtype="uint8",
+        )
+    return cell_matrix, cell_array, cell_mask_array

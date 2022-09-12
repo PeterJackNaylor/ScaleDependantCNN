@@ -184,6 +184,7 @@ if __name__ == "__main__":
     n_jobs = int(options.n_jobs)
     table_list = []
     cell_list = []
+    cell_mask_list = []
     last_index = 0
     if options.type == "tnbc":
         n = len(glob(os.path.join(options.folder, "Slide_*", "*.png")))
@@ -193,7 +194,7 @@ if __name__ == "__main__":
         gene_data(options.folder, options.type), total=n
     ):
         list_f[-2].set_shift((-options.marge, -options.marge))
-        table, cells = bin_extractor(
+        table, cells, cell_mask = bin_extractor(
             rgb_,
             bin_,
             list_f,
@@ -211,6 +212,7 @@ if __name__ == "__main__":
             table["patch"] = 0
         if table is not None:
             cell_list.append(cells)
+            cell_mask_list.append(cell_mask)
             n = table.shape[0]
             table["index"] = range(last_index, n + last_index)
             table.set_index(["index"], inplace=True)
@@ -222,6 +224,8 @@ if __name__ == "__main__":
     res = res[(res.T != 0).any()]  # drop rows where that are only 0! :)
     all_cells = np.vstack(cell_list)
     all_cells = all_cells[res.index]
+    all_cells_mask = np.vstack(cell_mask_list)
+    all_cells_mask = all_cells_mask[res.index]
 
     if options.type == "tnbc":
         # drop necrosis and myoepithelial
@@ -233,6 +237,7 @@ if __name__ == "__main__":
         res.loc[idx_train, "fold"] = "train"
         res.loc[idx_test, "fold"] = "test"
         all_cells = all_cells[res.index]
+        all_cells_mask = all_cells_mask[res.index]
         res = res.reset_index(drop=True)
         res.index.name = 'index'
     elif options.type == "consep":
@@ -249,3 +254,5 @@ if __name__ == "__main__":
     res.to_csv(os.path.join(options.out_path, options.name + ".csv"))
     fname = os.path.join(options.out_path, options.name + "_tinycells.npy")
     np.save(fname, all_cells)
+    fname = os.path.join(options.out_path, options.name + "_tinycells_mask.npy")
+    np.save(fname, all_cells_mask)
