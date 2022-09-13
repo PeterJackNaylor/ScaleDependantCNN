@@ -23,7 +23,7 @@ process extraction {
             """
             python $manual_extraction --folder $DATA/Train --name ${DATA}_train --type $DATA $OPTIONS
             python $manual_extraction --folder $DATA/Test  --name ${DATA}_test  --type $DATA $OPTIONS
-            python $merge ${DATA}_train.csv ${DATA}_test.csv ${DATA}_train_tinycells.npy ${DATA}_test_tinycells.npy $DATA
+            python $merge ${DATA}_train.csv ${DATA}_test.csv ${DATA}_train_tinycells.npy ${DATA}_test_tinycells.npy ${DATA}_train_tinycells_mask.npy ${DATA}_test_tinycells_mask.npy $DATA
             """
         else if ("${DATA}" == "pannuke")
             """
