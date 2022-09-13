@@ -190,3 +190,5 @@ if __name__ == "__main__":
     all_cells_mask = all_cells_mask[res.index]
     fname = os.path.join(options.out_path, options.name + "_tinycells.npy")
     np.save(fname, all_cells)
+    fname = os.path.join(options.out_path, options.name + "_tinycells_mask.npy")
+    np.save(fname, all_cells_mask)
