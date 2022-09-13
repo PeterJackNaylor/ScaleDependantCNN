@@ -12,5 +12,12 @@ res.to_csv(f"{sys.argv[5]}.csv")
 npy1 = np.load(sys.argv[3])
 npy2 = np.load(sys.argv[4])
 
+npy1_mask = np.load(sys.argv[5])
+npy2_mask = np.load(sys.argv[6])
+
 npy = np.concatenate([npy1, npy2], axis=0)
-np.save(f"{sys.argv[5]}_tinycells.npy", npy)
+np.save(f"{sys.argv[7]}_tinycells.npy", npy)
+
+npy = np.concatenate([npy1_mask, npy2_mask], axis=0)
+np.save(f"{sys.argv[7]}_tinycells_mask.npy", npy)
+
