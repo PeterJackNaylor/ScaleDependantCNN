@@ -78,14 +78,14 @@ def check_within_margin(rgb_image, marge, cell_prop):
         return False
 
 
-def get_crop(rgb_image, bin_image, cell_prop, d=0):
+def get_crop(rgb_image, bin_image, cell_prop, d=0, dilate_bin=True):
     # d is the dilation resolution to pad to the image
     x_m, y_m, x_M, y_M = cell_prop.bbox
     r_rgb = rgb_image[(x_m - d):(x_M + d), (y_m - d):(y_M + d)]
     r_bin = bin_image[(x_m - d):(x_M + d), (y_m - d):(y_M + d)].copy()
     r_bin[r_bin != cell_prop.label] = 0
     r_bin[r_bin == cell_prop.label] = 1
-    if d > 0:
+    if d > 0 and dilate_bin:
         r_bin = dilate(r_bin, d)
     return r_rgb, r_bin
 
@@ -133,6 +133,13 @@ def analyse_cell(
                 offset_all += ot
     return c_array
 
+def compute_pad_width(bin_crop, maxsize):
+    x, y = bin_crop.shape
+    left0 = maxsize // 2 - x // 2
+    right0 = maxsize - (left0 + x)
+    left1 = maxsize // 2 - y // 2
+    right1 = maxsize - (left1 + y)
+    return (left0, right0), (left1, right1)
 
 def bin_extractor(
     rgb_image,
@@ -146,6 +153,7 @@ def bin_extractor(
     cell_marge=0,
     pad=True,
     cellclass_map="0",
+    cellsize=128
 ):
     if pad:
         rgb_image = np.pad(
@@ -167,7 +175,7 @@ def bin_extractor(
         p += feat.size
     features_grow_region_n = needed_grown_region_dic(list_feature)
     if isinstance(cellclass_map, str):
-        cellclass = bin_image
+        cellclass = bin_image.copy()
     else:
         cellclass = cellclass_map
         if pad:
@@ -213,17 +221,22 @@ def bin_extractor(
                     bin_image_copy,
                     c,
                     d=cell_marge,
+                    dilate_bin=False
                 )
                 r_rgb = resize(
                     rgb_c, (cell_resize, cell_resize, 3), preserve_range=True
                 ).astype("uint8")
-                return r_rgb
+                pad_width = compute_pad_width(bin_c, cellsize)
+                r_bin = np.pad(bin_c, pad_width, constant_values=0)
+                return r_rgb, r_bin
             else:
                 return None
 
         # cell_array = Parallel(n_jobs=n_jobs)
         # (delayed(task_resize)(i) for i in cell_list)
-        cell_array = [task_resize(i) for i in tqdm(cell_list, leave=False)]
+        cell_mask_array = [task_resize(i) for i in tqdm(cell_list, leave=False)]
+        cell_array = [el[0] for el in cell_mask_array]
+        cell_mask = [el[1] for el in cell_mask_array]
         cell_array = [el for el in cell_array if el is not None]
         cell_array = np.stack(cell_array)
     else:
@@ -231,4 +244,4 @@ def bin_extractor(
             shape=(0, cell_resize, cell_resize, 3),
             dtype="uint8",
         )
-    return cell_matrix, cell_array
+    return cell_matrix, cell_array, cell_mask

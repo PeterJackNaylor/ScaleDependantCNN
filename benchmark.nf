@@ -7,7 +7,7 @@ include { evaluation } from './src/nf/evaluation'
 
 // data
 // dataset = Channel.from([file("./data/tnbc"), file("./data/consep"), file("./data/pannuke")])
-dataset = Channel.from([file("./data/tnbc")])
+dataset = Channel.from([file("./data/tnbc"), file("./data/consep")])
 
 // parameters
 methods_selection = ["ascending", "descending"]
@@ -30,23 +30,23 @@ number_bs = [0]
 workflow {
     main:
         extraction(dataset)
-        ext = extraction.out
+        // ext = extraction.out
 
-        manual(ext, methods_selection, repetition)
+        // manual(ext, methods_selection, repetition)
 
-        add_padding_mask(ext, padding_size) .set{data}
+        // add_padding_mask(ext, padding_size) .set{data}
 
-        pretrained_imagenet(data, opt, repetition)
+        // pretrained_imagenet(data, opt, repetition)
 
-        supervised_extraction(data, models, opt, 1..repetition, LR, WD, KS, epochs, bs, number_bs)
+        // supervised_extraction(data, models, opt, 1..repetition, LR, WD, KS, epochs, bs, number_bs)
 
-        ssl_moco(data, models, opt, 1..repetition, LR, WD, MB, KS, epochs, bs, number_bs)
+        // ssl_moco(data, models, opt, 1..repetition, LR, WD, MB, KS, epochs, bs, number_bs)
 
-        ssl_bt(data, models, opt, LAMBDA, FEATURE_DIM, 1..repetition, LR, WD, KS, epochs, bs, number_bs, ["normal"])
+        // ssl_bt(data, models, opt, LAMBDA, FEATURE_DIM, 1..repetition, LR, WD, KS, epochs, bs, number_bs, ["normal"])
 
 
-        ssl_bt.out[0].concat(manual.out[0], supervised_extraction.out[0], pretrained_imagenet.out, ssl_moco.out[0]) .set {encodings}
-        ssl_bt.out[1].concat(manual.out[1], supervised_extraction.out[1], ssl_moco.out[1]) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
+        // ssl_bt.out[0].concat(manual.out[0], supervised_extraction.out[0], pretrained_imagenet.out, ssl_moco.out[0]) .set {encodings}
+        // ssl_bt.out[1].concat(manual.out[1], supervised_extraction.out[1], ssl_moco.out[1]) .collectFile(skip: 1, keepHeader: true).collect() .set {training_score}
 
-        evaluation(encodings, training_score)
+        // evaluation(encodings, training_score)
 }
