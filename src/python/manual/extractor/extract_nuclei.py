@@ -235,8 +235,8 @@ def bin_extractor(
         # cell_array = Parallel(n_jobs=n_jobs)
         # (delayed(task_resize)(i) for i in cell_list)
         cell_mask_array = [task_resize(i) for i in tqdm(cell_list, leave=False)]
-        cell_array = [el[0] for el in cell_mask_array]
-        cell_mask = [el[1] for el in cell_mask_array]
+        cell_array = [el[0] for el in cell_mask_array if el is not None]
+        cell_mask = [el[1] for el in cell_mask_array if el is not None]
         cell_array = [el for el in cell_array if el is not None]
         cell_array = np.stack(cell_array)
     else:
