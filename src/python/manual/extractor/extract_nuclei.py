@@ -244,4 +244,5 @@ def bin_extractor(
             shape=(0, cell_resize, cell_resize, 3),
             dtype="uint8",
         )
+        cell_mask = cell_array.copy()
     return cell_matrix, cell_array, cell_mask
