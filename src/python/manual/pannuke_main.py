@@ -157,6 +157,7 @@ if __name__ == "__main__":
             pandas_table=True,
             n_jobs=n_jobs,
             cellclass_map=patch,
+            cellsize=192
         )
         table["name"] = name
         table["patch"] = patch
