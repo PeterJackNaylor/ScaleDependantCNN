@@ -238,11 +238,16 @@ def bin_extractor(
         cell_array = [el[0] for el in cell_mask_array if el is not None]
         cell_mask = [el[1] for el in cell_mask_array if el is not None]
         cell_array = [el for el in cell_array if el is not None]
+        cell_mask = [el for el in cell_mask if el is not None]
         cell_array = np.stack(cell_array)
+        cell_mask = np.stack(cell_mask)
     else:
         cell_array = np.zeros(
             shape=(0, cell_resize, cell_resize, 3),
             dtype="uint8",
         )
-        cell_mask = cell_array.copy()
+        cell_mask = np.zeros(
+            shape=(0, cellsize, cellsize),
+            dtype="uint8",
+        )
     return cell_matrix, cell_array, cell_mask
